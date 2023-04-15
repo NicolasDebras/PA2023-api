@@ -12,3 +12,22 @@ class Friend(models.Model):
 
     #Si false -> juste une invitation 
     accepting = models.BooleanField(default=False)
+
+class Party(models.Model): 
+    title = models.CharField(max_length=50)
+    Founder = models.ForeignKey(Player, on_delete=models.CASCADE)
+
+    #si false -> partie pas encore commencé 
+    started = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Participant(models.Model):
+    party = models.ForeignKey(Party, on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+
+    #Si false -> juste une invitation 
+    accepting = models.BooleanField(default=False)
+
+

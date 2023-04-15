@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Friend
+from .models import Friend, Participant, Party
 
 class FriendSerializers(serializers.ModelSerializer):
     class Meta:
@@ -23,9 +23,18 @@ class PlayerSerializers(serializers.ModelSerializer):
         return user
 
 
+class ParticipantSerializers(serializers.ModelSerializer): 
+    class Meta:
+        model = Participant
+        fields = '__all__'
 
 
+class PartySerializers(serializers.ModelSerializer): 
+    participant = FriendSerializers(many= True, allow_null=True, read_only=True)
 
+    class Meta:
+        model = Party
+        fields = ('id', 'title', 'Founder', 'started', 'created_at','participant')
 
 
 

@@ -6,6 +6,7 @@ from . import views
 router = routers.SimpleRouter()
 router.register(r'player', views.PlayerViewSet)
 router.register(r'friend', views.FriendViewSet)
+router.register(r'party', views.PartyViewSet)
 
 urlpatterns = [
     path('auth/', obtain_auth_token),
