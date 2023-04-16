@@ -30,11 +30,11 @@ class ParticipantSerializers(serializers.ModelSerializer):
 
 
 class PartySerializers(serializers.ModelSerializer): 
-    participant = FriendSerializers(many= True, allow_null=True, read_only=True)
+    participant_party = ParticipantSerializers(many= True, allow_null=True, read_only=True)
 
     class Meta:
         model = Party
-        fields = ('id', 'title', 'Founder', 'started', 'created_at','participant')
+        fields = ['id', 'title', 'Founder', 'started', 'created_at','participant_party']
 
 
 

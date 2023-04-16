@@ -1,6 +1,6 @@
-from .serializers import PlayerSerializers, FriendSerializers, PartySerializers
-from .permissions import IsCreationOrIsAuthenticated
-from .models import Friend, Player, Party
+from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers
+from .permissions import IsCreationOrIsAuthenticated, IsViewOrIsAuthenticated
+from .models import Friend, Player, Party, Participant
 
 
 from rest_framework.response import Response
@@ -34,8 +34,7 @@ class PartyViewSet(viewsets.ModelViewSet):
     serializer_class = PartySerializers
 
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsCreationOrIsAuthenticated,)
-
+    permission_classes = (IsViewOrIsAuthenticated,)
 
 
 class FriendViewSet(viewsets.ModelViewSet):
@@ -50,7 +49,6 @@ class FriendViewSet(viewsets.ModelViewSet):
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
-@permission_classes([IsCreationOrIsAuthenticated])
 def PlayerFindWithUsername(request, username):
     try:
         player = Player.objects.get(username=username)
@@ -58,3 +56,15 @@ def PlayerFindWithUsername(request, username):
         return Response(status=404)
     serializers = PlayerSerializers(player)
     return Response(serializers.data)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+def AddParticipant(request, player, party):
+    try:
+        pl = Player.objects.get(id=player)
+        pt = Party.objects.get(id=party)
+    except:
+        return Response(status=404)
+    participant = Participant.objects.create(party=pt, player=pl)
+    participant.save()
+    return Response(status=200)
