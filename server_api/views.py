@@ -28,7 +28,7 @@ class PlayerViewSet(viewsets.ModelViewSet):
     permission_classes = (IsCreationOrIsAuthenticated,)
 
 class PartyViewSet(viewsets.ModelViewSet):
-    User = get_user_model()
+    
     #queryset permet de créer un CRUD 
     queryset = Party.objects.all()
     serializer_class = PartySerializers
@@ -61,10 +61,15 @@ def PlayerFindWithUsername(request, username):
 @authentication_classes([TokenAuthentication])
 def AddParticipant(request, player, party):
     try:
-        pl = Player.objects.get(id=player)
         pt = Party.objects.get(id=party)
+        pl = Player.objects.get(id=player)
     except:
         return Response(status=404)
-    participant = Participant.objects.create(party=pt, player=pl)
-    participant.save()
-    return Response(status=200)
+    # Utilisation de la méthode get_or_create pour éviter les doublons
+    participant, created = Participant.objects.get_or_create(party=pt, player=pl)
+
+    if created:
+        participant.save()
+        return Response(status=201)  # Objet créé
+    else:
+        return Response(status=409)  # Objet déjà existant

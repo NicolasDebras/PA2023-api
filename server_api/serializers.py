@@ -24,13 +24,16 @@ class PlayerSerializers(serializers.ModelSerializer):
 
 
 class ParticipantSerializers(serializers.ModelSerializer): 
+    player = PlayerSerializers(allow_null=True, read_only=True)
+
     class Meta:
         model = Participant
-        fields = '__all__'
+        fields = ['id', 'accepting', 'player']
 
 
 class PartySerializers(serializers.ModelSerializer): 
     participant_party = ParticipantSerializers(many= True, allow_null=True, read_only=True)
+    Founder = PlayerSerializers(read_only=True)
 
     class Meta:
         model = Party
