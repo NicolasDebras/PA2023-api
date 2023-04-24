@@ -1,4 +1,4 @@
-from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers
+from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers, ADDPartySerializers
 from .permissions import IsCreationOrIsAuthenticated, IsViewOrIsAuthenticated
 from .models import Friend, Player, Party, Participant
 
@@ -36,6 +36,15 @@ class PartyViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsViewOrIsAuthenticated,)
 
+
+class ADDPartyViewSet(viewsets.ModelViewSet):
+    
+    #queryset permet de créer un CRUD 
+    queryset = Party.objects.all()
+    serializer_class = ADDPartySerializers
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsViewOrIsAuthenticated,)
 
 class FriendViewSet(viewsets.ModelViewSet):
     queryset = Friend.objects.all()
@@ -124,4 +133,5 @@ def accept_friendship(request, friend_id):
 
     serializer = FriendSerializers(friend)
     return Response(serializer.data)
+
 

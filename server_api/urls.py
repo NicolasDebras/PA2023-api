@@ -6,6 +6,7 @@ from . import views
 router = routers.SimpleRouter()
 router.register(r'player', views.PlayerViewSet)
 router.register(r'friend', views.FriendViewSet)
+router.register(r'addparty', views.ADDPartyViewSet)
 router.register(r'party', views.PartyViewSet)
 
 urlpatterns = [
@@ -14,6 +15,6 @@ urlpatterns = [
     path('addParticipant/<int:player>/<int:party>/', views.AddParticipant),
     path('accept/<int:participant_id>/', views.accept_invitation),
     path('addfirend/<int:player1_id>/<int:player2_id>/', views.add_friend),
-    path('acceptfriend/<int:friend_id>/', views.accept_friendship)
+    path('acceptfriend/<int:friend_id>/', views.accept_friendship),
 ]
 urlpatterns += router.urls
