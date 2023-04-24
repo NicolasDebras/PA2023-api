@@ -1,4 +1,4 @@
-from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers, ADDPartySerializers
+from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers
 from .permissions import IsCreationOrIsAuthenticated, IsViewOrIsAuthenticated
 from .models import Friend, Player, Party, Participant
 
@@ -37,14 +37,6 @@ class PartyViewSet(viewsets.ModelViewSet):
     permission_classes = (IsViewOrIsAuthenticated,)
 
 
-class ADDPartyViewSet(viewsets.ModelViewSet):
-    
-    #queryset permet de créer un CRUD 
-    queryset = Party.objects.all()
-    serializer_class = ADDPartySerializers
-
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsViewOrIsAuthenticated,)
 
 class FriendViewSet(viewsets.ModelViewSet):
     queryset = Friend.objects.all()

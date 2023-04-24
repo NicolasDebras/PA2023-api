@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Friend, Participant, Party
+from .models import Friend, Participant, Party, Player
 
 class FriendSerializers(serializers.ModelSerializer):
     class Meta:
@@ -31,20 +31,28 @@ class ParticipantSerializers(serializers.ModelSerializer):
         fields = ['id', 'accepting', 'player']
 
 
-class PartySerializers(serializers.ModelSerializer): 
-    participant_party = ParticipantSerializers(many= True, allow_null=True, read_only=True)
-    Founder = PlayerSerializers(read_only=True)
+class PartySerializers(serializers.ModelSerializer):
+    participant_party = ParticipantSerializers(many=True, allow_null=True, read_only=True)
+    founder_id = serializers.PrimaryKeyRelatedField(
+        queryset=Player.objects.all(),
+        source='Founder',
+        write_only=True
+    )
 
     class Meta:
         model = Party
-        fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at','participant_party']
+        fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at', 'participant_party', 'founder_id']
+        read_only_fields = ['Founder']
 
-class ADDPartySerializers(serializers.ModelSerializer): 
-    participant_party = ParticipantSerializers(many= True, allow_null=True, read_only=True)
+    def create(self, validated_data):
+        founder_id = validated_data.pop('Founder_id', None)
+        party = Party.objects.create(**validated_data)
 
-    class Meta:
-        model = Party
-        fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at','participant_party']
+        if founder_id:
+            party.Founder = founder_id
+            party.save()
+
+        return party
 
 
 

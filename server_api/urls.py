@@ -6,7 +6,6 @@ from . import views
 router = routers.SimpleRouter()
 router.register(r'player', views.PlayerViewSet)
 router.register(r'friend', views.FriendViewSet)
-router.register(r'addparty', views.ADDPartyViewSet)
 router.register(r'party', views.PartyViewSet)
 
 urlpatterns = [
