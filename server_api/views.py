@@ -73,3 +73,18 @@ def AddParticipant(request, player, party):
         return Response(status=201)  # Objet créé
     else:
         return Response(status=409)  # Objet déjà existant
+
+
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+def accept_invitation(request, participant_id):
+    try:
+        participant = Participant.objects.get(id=participant_id)
+    except Participant.DoesNotExist:
+        return Response(status=404)
+
+    participant.accepting = True
+    participant.save()
+    
+    serializer = ParticipantSerializers(participant)
+    return Response(serializer.data)

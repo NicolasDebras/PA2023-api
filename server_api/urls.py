@@ -11,6 +11,7 @@ router.register(r'party', views.PartyViewSet)
 urlpatterns = [
     path('auth/', obtain_auth_token),
     path('playerName/<str:username>/', views.PlayerFindWithUsername),
-    path('addParticipant/<int:player>/<int:party>/', views.AddParticipant)
+    path('addParticipant/<int:player>/<int:party>/', views.AddParticipant),
+    path('accept/<int:participant_id>/', views.accept_invitation)
 ]
 urlpatterns += router.urls
