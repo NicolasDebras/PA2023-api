@@ -2,8 +2,6 @@
 __pycache__/
 env/
 .vscode/
-<<<<<<< HEAD
 .server\Lib\
 .server\Scripts\
-=======
->>>>>>> dev_nicolas
+
