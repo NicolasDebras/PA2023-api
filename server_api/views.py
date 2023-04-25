@@ -30,7 +30,7 @@ class PlayerViewSet(viewsets.ModelViewSet):
 
 
 class PartyPagination(PageNumberPagination):
-    page_size = 10  # Nombre de parties par page
+    page_size = 9  # Nombre de parties par page
     page_size_query_param = 'page_size'
     max_page_size = 100
 
