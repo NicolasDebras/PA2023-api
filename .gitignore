@@ -4,4 +4,4 @@ env/
 .vscode/
 .server\Lib\
 .server\Scripts\
-
+*.cfg
