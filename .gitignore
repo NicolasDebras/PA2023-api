@@ -2,5 +2,12 @@
 __pycache__/
 env/
 .vscode/
+<<<<<<< HEAD
 server/Lib/
 server/Scripts/
+=======
+.server\Lib\
+.server\Scripts\
+.
+
+>>>>>>> 0045f3d0f9c331756ea03ac7b13173b8bf44b6b3

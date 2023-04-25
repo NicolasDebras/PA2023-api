@@ -16,6 +16,7 @@ class Friend(models.Model):
 class Party(models.Model): 
     title = models.CharField(max_length=50)
     Founder = models.ForeignKey(Player, related_name='founder', on_delete=models.CASCADE)
+    url_image = models.CharField(max_length=500, null=True)
 
     #si false -> partie pas encore commencé 
     started = models.BooleanField(default=False)
