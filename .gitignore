@@ -2,6 +2,8 @@
 __pycache__/
 env/
 .vscode/
+server/Lib/
+server/Scripts/
 .server\Lib\
 .server\Scripts\
 *.cfg
