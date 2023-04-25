@@ -1,13 +1,10 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-<<<<<<< HEAD
 from .models import Friend, Participant, Party
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from rest_framework import serializers
-=======
 from .models import Friend, Participant, Party, Player
->>>>>>> 0045f3d0f9c331756ea03ac7b13173b8bf44b6b3
 
 class FriendSerializers(serializers.ModelSerializer):
     class Meta:

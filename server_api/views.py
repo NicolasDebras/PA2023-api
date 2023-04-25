@@ -106,92 +106,46 @@ def accept_invitation(request, participant_id):
 
     participant.accepting = True
     participant.save()
-<<<<<<< HEAD
     return Response(status=200)
 
     ## To do for reset
 
-User = get_user_model()
-class PasswordResetView(generics.GenericAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = PasswordResetSerializer
+# User = get_user_model()
+# class PasswordResetView(generics.GenericAPIView):
+#     permission_classes = [AllowAny]
+#     serializer_class = PasswordResetSerializer
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = User.objects.get(email=serializer.validated_data['email'])
+#     def post(self, request):
+#         serializer = self.serializer_class(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         user = User.objects.get(email=serializer.validated_data['email'])
 
-        # Crée un token de réinitialisation de mot de passe
-        token = user.password_reset_token()
-        user.save()
+#         # Crée un token de réinitialisation de mot de passe
+#         token = user.password_reset_token()
+#         user.save()
 
-        # Envoie l'email de réinitialisation de mot de passe à l'utilisateur
-        subject = 'Réinitialisation de votre mot de passe'
-        message = render_to_string('reset_password_email.html', {
-            'user': user,
-            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-            'token': token,
-            'reset_url': reverse('password_reset_confirm'),
-        })
-        send_mail(subject, message, 'noreply@example.com', [user.email])
+#         # Envoie l'email de réinitialisation de mot de passe à l'utilisateur
+#         subject = 'Réinitialisation de votre mot de passe'
+#         message = render_to_string('reset_password_email.html', {
+#             'user': user,
+#             'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+#             'token': token,
+#             'reset_url': reverse('password_reset_confirm'),
+#         })
+#         send_mail(subject, message, 'noreply@example.com', [user.email])
 
-        return Response({'detail': 'Un email de réinitialisation de mot de passe vous a été envoyé.'}, status=status.HTTP_200_OK)
+#         return Response({'detail': 'Un email de réinitialisation de mot de passe vous a été envoyé.'}, status=status.HTTP_200_OK)
 
-class PasswordResetConfirmView(generics.GenericAPIView):
-    permission_classes = [AllowAny]
-    serializer_class = PasswordResetConfirmSerializer
+# class PasswordResetConfirmView(generics.GenericAPIView):
+#     permission_classes = [AllowAny]
+#     serializer_class = PasswordResetConfirmSerializer
 
-    def get_user(self, uidb64):
-        try:
-            uid = urlsafe_base64_decode(uidb64).decode()
-            user = User.objects.get(pk=uid)
-            return user
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            return None
+#     def get_user(self, uidb64):
+#         try:
+#             uid = urlsafe_base64_decode(uidb64).decode()
+#             user = User.objects.get(pk=uid)
+#             return user
+#         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+#             return None
 
-    def get(self, request, uidb64):
-=======
-    
-    serializer = ParticipantSerializers(participant)
-    return Response(serializer.data)
-
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-def add_friend(request, player1_id, player2_id):
-    if player1_id == player2_id:
-        return Response(status=409)
-    try:
-        player1 = Player.objects.get(id=player1_id)
-        player2 = Player.objects.get(id=player2_id)
-    except Player.DoesNotExist:
-        return Response(status=404)
-
-    # Vérifier si les deux joueurs sont déjà amis
-    if Friend.objects.filter(Player1=player1, Player2=player2).exists() or Friend.objects.filter(Player1=player2, Player2=player1).exists():
-        return Response(status=409)  
-
-    friend = Friend.objects.create(Player1=player1, Player2=player2)
-    friend.save()
-
-    serializer = FriendSerializers(friend)
-    return Response(serializer.data, status=201)  
-
-
-@api_view(['PUT'])
-@authentication_classes([TokenAuthentication])
-def accept_friendship(request, friend_id):
-    try:
-        friend = Friend.objects.get(id=friend_id)
-    except Friend.DoesNotExist:
-        return Response(status=404)
-
-    friend.accepting = True
-    friend.save()
-
-    serializer = FriendSerializers(friend)
-    return Response(serializer.data)
-
-
-
-
->>>>>>> 0045f3d0f9c331756ea03ac7b13173b8bf44b6b3
+#     def get(self, request, uidb64):
