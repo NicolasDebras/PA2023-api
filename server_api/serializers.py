@@ -33,6 +33,7 @@ class ParticipantSerializers(serializers.ModelSerializer):
 
 class PartySerializers(serializers.ModelSerializer):
     participant_party = ParticipantSerializers(many=True, allow_null=True, read_only=True)
+    Founder = PlayerSerializers(read_only=True)
     founder_id = serializers.PrimaryKeyRelatedField(
         queryset=Player.objects.all(),
         source='Founder',

@@ -11,6 +11,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.pagination import PageNumberPagination
 
 
 # Create your views here.
@@ -27,6 +28,12 @@ class PlayerViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsCreationOrIsAuthenticated,)
 
+
+class PartyPagination(PageNumberPagination):
+    page_size = 10  # Nombre de parties par page
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 class PartyViewSet(viewsets.ModelViewSet):
     
     #queryset permet de créer un CRUD 
@@ -35,6 +42,7 @@ class PartyViewSet(viewsets.ModelViewSet):
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsViewOrIsAuthenticated,)
+    pagination_class = PartyPagination
 
 
 
