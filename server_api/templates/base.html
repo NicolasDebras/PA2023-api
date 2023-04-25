@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}MySite{% endblock %}</title>
+  {% block head %}
+    <!-- Additional CSS and JavaScript files can be included here -->
+  {% endblock %}
+</head>
+<body>
+  <nav>
+    <!-- Navigation links can be added here -->
+  </nav>
+  <main>
+    {% block content %}
+      <!-- Main content can be added here -->
+    {% endblock %}
+  </main>
+  <footer>
+    <!-- Footer content can be added here -->
+  </footer>
+  {% block foot %}
+    <!-- Additional JavaScript files and code can be included here -->
+  {% endblock %}
+</body>
+</html>

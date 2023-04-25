@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 class Player(AbstractUser):
-    pass
     commentaire = models.CharField(max_length=50).empty_strings_allowed
 
 class Friend(models.Model): 
@@ -31,4 +30,4 @@ class Participant(models.Model):
     #Si false -> juste une invitation 
     accepting = models.BooleanField(default=False)
 
-
+ 

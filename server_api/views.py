@@ -1,4 +1,4 @@
-from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers
+from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers,PasswordResetSerializer,PasswordResetConfirmSerializer
 from .permissions import IsCreationOrIsAuthenticated, IsViewOrIsAuthenticated
 from .models import Friend, Player, Party, Participant
 
@@ -6,13 +6,22 @@ from .models import Friend, Player, Party, Participant
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+from django.core.mail import send_mail
+from django.contrib.sites.shortcuts import get_current_site
+
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
-
+from rest_framework import generics
+from rest_framework.permissions import AllowAny
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.pagination import PageNumberPagination
 
@@ -95,7 +104,6 @@ def AddParticipant(request, player, party):
     else:
         return Response(status=409)  # Objet déjà existant
 
-
 @api_view(['PUT'])
 @authentication_classes([TokenAuthentication])
 def accept_invitation(request, participant_id):
@@ -106,92 +114,47 @@ def accept_invitation(request, participant_id):
 
     participant.accepting = True
     participant.save()
-<<<<<<< HEAD
     return Response(status=200)
 
     ## To do for reset
-
-User = get_user_model()
 class PasswordResetView(generics.GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = PasswordResetSerializer
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = User.objects.get(email=serializer.validated_data['email'])
+         serializer = self.serializer_class(data=request.data)
+         serializer.is_valid(raise_exception=True)
+         User = get_user_model()
+         user = User.objects.filter(email=serializer.validated_data['email']).first()
 
-        # Crée un token de réinitialisation de mot de passe
-        token = user.password_reset_token()
-        user.save()
+         # Crée un token de réinitialisation de mot de passe
+         token_generator = PasswordResetTokenGenerator()
+         token = token_generator.make_token(user)
+         user.save()
+         uid64=urlsafe_base64_encode(force_bytes(user.pk))
+#         # Envoie l'email de réinitialisation de mot de passe à l'utilisateur
+         subject = 'Réinitialisation de votre mot de passe'
+         current_site = get_current_site(request)
+         message = render_to_string('registration/password_reset_email.html', {
+             'user': user,
+             'uid': uid64,
+             'token': token,
+             'domain':current_site,
+             'reset_url': reverse('password_reset_confirm',args=(uid64, token)),
+         })
+         send_mail(subject, message, 'noreply@example.com', [user.email])
 
-        # Envoie l'email de réinitialisation de mot de passe à l'utilisateur
-        subject = 'Réinitialisation de votre mot de passe'
-        message = render_to_string('reset_password_email.html', {
-            'user': user,
-            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-            'token': token,
-            'reset_url': reverse('password_reset_confirm'),
-        })
-        send_mail(subject, message, 'noreply@example.com', [user.email])
-
-        return Response({'detail': 'Un email de réinitialisation de mot de passe vous a été envoyé.'}, status=status.HTTP_200_OK)
+         return Response({'detail': 'Un email de réinitialisation de mot de passe vous a été envoyé.'}, status=200)
 
 class PasswordResetConfirmView(generics.GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = PasswordResetConfirmSerializer
 
-    def get_user(self, uidb64):
+    def get_user(self,request, uidb64,token):
         try:
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
             return user
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             return None
-
-    def get(self, request, uidb64):
-=======
-    
-    serializer = ParticipantSerializers(participant)
-    return Response(serializer.data)
-
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-def add_friend(request, player1_id, player2_id):
-    if player1_id == player2_id:
-        return Response(status=409)
-    try:
-        player1 = Player.objects.get(id=player1_id)
-        player2 = Player.objects.get(id=player2_id)
-    except Player.DoesNotExist:
-        return Response(status=404)
-
-    # Vérifier si les deux joueurs sont déjà amis
-    if Friend.objects.filter(Player1=player1, Player2=player2).exists() or Friend.objects.filter(Player1=player2, Player2=player1).exists():
-        return Response(status=409)  
-
-    friend = Friend.objects.create(Player1=player1, Player2=player2)
-    friend.save()
-
-    serializer = FriendSerializers(friend)
-    return Response(serializer.data, status=201)  
-
-
-@api_view(['PUT'])
-@authentication_classes([TokenAuthentication])
-def accept_friendship(request, friend_id):
-    try:
-        friend = Friend.objects.get(id=friend_id)
-    except Friend.DoesNotExist:
-        return Response(status=404)
-
-    friend.accepting = True
-    friend.save()
-
-    serializer = FriendSerializers(friend)
-    return Response(serializer.data)
-
-
-
-
->>>>>>> 0045f3d0f9c331756ea03ac7b13173b8bf44b6b3
+ 
