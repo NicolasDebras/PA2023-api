@@ -9,7 +9,7 @@ router.register(r'friend', views.FriendViewSet)
 router.register(r'party', views.PartyViewSet)
 
 urlpatterns = [
-    path('auth/', obtain_auth_token),
+    path('auth/', views.CustomAuthToken.as_view()),
     path('playerName/<str:username>/', views.PlayerFindWithUsername),
     path('addParticipant/<int:player>/<int:party>/', views.AddParticipant),
     path('accept/<int:participant_id>/', views.accept_invitation),
