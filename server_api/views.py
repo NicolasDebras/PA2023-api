@@ -106,7 +106,47 @@ def accept_invitation(request, participant_id):
 
     participant.accepting = True
     participant.save()
-    return Response(status=200)
+    
+    serializer = ParticipantSerializers(participant)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+def add_friend(request, player1_id, player2_id):
+    if player1_id == player2_id:
+        return Response(status=409)
+    try:
+        player1 = Player.objects.get(id=player1_id)
+        player2 = Player.objects.get(id=player2_id)
+    except Player.DoesNotExist:
+        return Response(status=404)
+
+    # Vérifier si les deux joueurs sont déjà amis
+    if Friend.objects.filter(Player1=player1, Player2=player2).exists() or Friend.objects.filter(Player1=player2, Player2=player1).exists():
+        return Response(status=409)  
+
+    friend = Friend.objects.create(Player1=player1, Player2=player2)
+    friend.save()
+
+    serializer = FriendSerializers(friend)
+    return Response(serializer.data, status=201)  
+
+
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+def accept_friendship(request, friend_id):
+    try:
+        friend = Friend.objects.get(id=friend_id)
+    except Friend.DoesNotExist:
+        return Response(status=404)
+
+    friend.accepting = True
+    friend.save()
+
+    serializer = FriendSerializers(friend)
+    return Response(serializer.data)
+
+
 
     ## To do for reset
 
