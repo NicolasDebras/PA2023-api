@@ -147,6 +147,18 @@ def accept_friendship(request, friend_id):
     return Response(serializer.data)
 
 
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+def patybyuser(request, user_id):
+    try:
+        party = Party.objects.getAll(player=user_id)
+    except:
+        return Response(status=404)
+
+    serializer = PartySerializers(party)
+    return Response(serializer.data)
+
+
 
     ## To do for reset
 
