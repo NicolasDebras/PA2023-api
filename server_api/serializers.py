@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from rest_framework import serializers
 from .models import Friend, Participant, Party, Player
+from django.db.models import Q
 
 class FriendSerializers(serializers.ModelSerializer):
     class Meta:
@@ -13,18 +14,32 @@ class FriendSerializers(serializers.ModelSerializer):
 
 
 class PlayerSerializers(serializers.ModelSerializer):
-    friend = FriendSerializers(many=True, allow_null=True, read_only=True)
+    friends = serializers.SerializerMethodField()
 
     class Meta:
         User = get_user_model()
         model = User
-        fields = ('id', 'username', 'password', 'email', 'first_name', 'last_name', 'commentaire', 'friend')
+        fields = ('id', 'username', 'password', 'email', 'first_name', 'last_name', 'commentaire', 'friends')
         extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
     def create(self, validated_data):
         User = get_user_model()
         user = User.objects.create_user(**validated_data)
         return user
+
+    def get_friends(self, obj):
+        friends = Friend.objects.filter(Q(Player1=obj) | Q(Player2=obj), accepting=True)
+        friend_data = []
+        for friend in friends:
+            if friend.Player1 == obj:
+                friend_username = friend.Player2.username
+                id = friend.Player2.id
+            else:
+                friend_username = friend.Player1.username
+                id = friend.Player1.id
+            friend_data.append({'username': friend_username,
+                                'id': id})
+        return friend_data
 
 
 class ParticipantSerializers(serializers.ModelSerializer): 
