@@ -121,11 +121,14 @@ class PasswordResetView(generics.GenericAPIView):
     permission_classes = [AllowAny]
     serializer_class = PasswordResetSerializer
 
-    def post(self, request):
+    def post(self, request, player_id):
          serializer = self.serializer_class(data=request.data)
          serializer.is_valid(raise_exception=True)
-         User = get_user_model()
-         user = User.objects.filter(email=serializer.validated_data['email']).first()
+         try:
+            user = Player.objects.get(id=player_id)
+         except:
+                print(player_id)
+                return Response(status=404)
 
          # Crée un token de réinitialisation de mot de passe
          token_generator = PasswordResetTokenGenerator()
@@ -142,6 +145,7 @@ class PasswordResetView(generics.GenericAPIView):
              'domain':current_site,
              'reset_url': reverse('password_reset_confirm',args=(uid64, token)),
          })
+         print([user.email])
          send_mail(subject, message, 'noreply@example.com', [user.email])
 
          return Response({'detail': 'Un email de réinitialisation de mot de passe vous a été envoyé.'}, status=200)
