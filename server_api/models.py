@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 class Player(AbstractUser):
     pass
+    url_image = models.CharField(max_length=500, null=True)
     commentaire = models.CharField(max_length=50).empty_strings_allowed
 
 class Friend(models.Model): 

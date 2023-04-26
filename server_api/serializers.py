@@ -19,7 +19,7 @@ class PlayerSerializers(serializers.ModelSerializer):
     class Meta:
         User = get_user_model()
         model = User
-        fields = ('id', 'username', 'password', 'email', 'first_name', 'last_name', 'commentaire', 'friends')
+        fields = ('id', 'username', 'password', 'email', 'first_name', 'last_name', 'commentaire', 'url_image' ,'friends')
         extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
     def create(self, validated_data):
