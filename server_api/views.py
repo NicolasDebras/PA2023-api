@@ -82,6 +82,8 @@ class MyPartyView(APIView):
             raise Response(status=404, data={"Mauvais d'id" : id_player})
         except Exception as e:
             return Response(data={'error': str(e)}, status=500)
+        
+
 #-----------------Requete classique---------------------------------------------------
 
 @api_view(['GET'])
@@ -107,7 +109,7 @@ def AddParticipant(request, player, party):
 
     if created:
         participant.save()
-        return Response(status=201)  # Objet créé
+        return Response(status=201, data={"id": participant.id})  # Objet créé
     else:
         return Response(status=409)  # Objet déjà existant
 
