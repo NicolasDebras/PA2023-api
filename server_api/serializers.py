@@ -55,15 +55,17 @@ class PlayerSerializers(serializers.ModelSerializer):
                 friend_username = friend.Player2.username                
                 player_id = friend.Player2.id
                 other = friend.Player1.id
+                url_image = friend.Player2.url_image;
             else:
                 friend_username = friend.Player1.username
                 player_id = friend.Player1.id
                 other = friend.Player2.id
+                url_image = friend.Player1.url_image;
             if who_ask.id != other:
                 friend_data.append({'username': friend_username,
                                 'player_id': player_id,
                                 'asc_id': id,
-                                })
+                                'url_image': url_image,})
         return friend_data
 
 
