@@ -88,7 +88,8 @@ class ParticipantSerializers(serializers.ModelSerializer):
 
 
 class PartySerializers(serializers.ModelSerializer):
-    participant_party = ParticipantSerializers(many=True, allow_null=True, read_only=True)
+    accepting_participants = serializers.SerializerMethodField()
+    pending_participants = serializers.SerializerMethodField()
     Founder = LessPlayerSerializers(read_only=True)
     founder_id = serializers.PrimaryKeyRelatedField(
         queryset=Player.objects.all(),
@@ -97,8 +98,16 @@ class PartySerializers(serializers.ModelSerializer):
     )
     class Meta:
         model = Party
-        fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at', 'participant_party', 'founder_id']
+        fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at', 'accepting_participants', 'pending_participants', 'founder_id']
         read_only_fields = ['Founder']
+
+    def get_accepting_participants(self, obj):
+        accepting_participants = Participant.objects.filter(party=obj, accepting=True)
+        return ParticipantSerializers(accepting_participants, many=True).data
+
+    def get_pending_participants(self, obj):
+        pending_participants = Participant.objects.filter(party=obj, accepting=False)
+        return ParticipantSerializers(pending_participants, many=True).data
 
     def create(self, validated_data):
         founder_id = validated_data.pop('Founder_id', None)
