@@ -54,10 +54,12 @@ class PlayerSerializers(serializers.ModelSerializer):
             if friend.Player1 == obj:
                 friend_username = friend.Player2.username                
                 player_id = friend.Player2.id
+                other = friend.Player1.id
             else:
                 friend_username = friend.Player1.username
                 player_id = friend.Player1.id
-            if who_ask.username != friend_username:
+                other = friend.Player2.id
+            if who_ask.id != other:
                 friend_data.append({'username': friend_username,
                                 'player_id': player_id,
                                 'asc_id': id,
