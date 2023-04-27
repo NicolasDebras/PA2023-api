@@ -33,7 +33,7 @@ class PlayerViewSet(viewsets.ModelViewSet):
     permission_classes = (IsCreationOrIsAuthenticated,)
 
 
-class PartyPagination(PageNumberPagination):
+class Pagination(PageNumberPagination):
     page_size = 9  # Nombre de parties par page
     page_size_query_param = 'page_size'
     max_page_size = 100
@@ -46,8 +46,7 @@ class PartyViewSet(viewsets.ModelViewSet):
 
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsViewOrIsAuthenticated,)
-    pagination_class = PartyPagination
-
+    pagination_class = Pagination
 
 
 class FriendViewSet(viewsets.ModelViewSet):
@@ -66,6 +65,9 @@ class CustomAuthToken(ObtainAuthToken):
         return Response({'token': token, 'user_id': user_id})
 
 class MyPartyView(APIView):
+    pagination_class = Pagination
+    authentication_classes = (TokenAuthentication,)
+
     def get(self, request, id_player):
         try:
             founded_parties = Party.objects.filter(Founder_id=id_player)
