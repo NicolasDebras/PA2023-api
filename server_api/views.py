@@ -39,7 +39,6 @@ class Pagination(PageNumberPagination):
     max_page_size = 100
 
 class PartyViewSet(viewsets.ModelViewSet):
-    
     #queryset permet de créer un CRUD 
     queryset = Party.objects.all()
     serializer_class = PartySerializers
@@ -65,22 +64,24 @@ class CustomAuthToken(ObtainAuthToken):
         return Response({'token': token, 'user_id': user_id})
 
 class MyPartyView(APIView):
-    pagination_class = Pagination
-    authentication_classes = (TokenAuthentication,)
+    pagination_class = Pagination()
 
     def get(self, request, id_player):
         try:
             founded_parties = Party.objects.filter(Founder_id=id_player)
             participated_parties = Party.objects.filter(participant_party__player_id=id_player)
-            founded_parties_serialized = PartySerializers(founded_parties, many=True).data
-            participated_parties_serialized = PartySerializers(participated_parties, many=True).data
-            my_parties = founded_parties_serialized + participated_parties_serialized
-            return Response({'my_parties': my_parties}, status=200)
+
+            # On pagine les résultats ici
+            parties = founded_parties.union(participated_parties).order_by('-id')
+            parties_page = self.pagination_class.paginate_queryset(parties, request)
+
+            serialized_parties = PartySerializers(parties_page, many=True).data
+            return self.pagination_class.get_paginated_response(serialized_parties)
+
         except Party.DoesNotExist:
             raise Response(status=404, data={"Mauvais d'id" : id_player})
         except Exception as e:
             return Response(data={'error': str(e)}, status=500)
-
 #-----------------Requete classique---------------------------------------------------
 
 @api_view(['GET'])
