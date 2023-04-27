@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.pagination import PageNumberPagination
@@ -64,7 +65,19 @@ class CustomAuthToken(ObtainAuthToken):
         user_id = Token.objects.get(key=token).user_id
         return Response({'token': token, 'user_id': user_id})
 
-
+class MyPartyView(APIView):
+    def get(self, request, id_player):
+        try:
+            founded_parties = Party.objects.filter(Founder_id=id_player)
+            participated_parties = Party.objects.filter(participant_party__player_id=id_player)
+            founded_parties_serialized = PartySerializers(founded_parties, many=True).data
+            participated_parties_serialized = PartySerializers(participated_parties, many=True).data
+            my_parties = founded_parties_serialized + participated_parties_serialized
+            return Response({'my_parties': my_parties}, status=200)
+        except Party.DoesNotExist:
+            raise Response(status=404, data={"Mauvais d'id" : id_player})
+        except Exception as e:
+            return Response(data={'error': str(e)}, status=500)
 
 #-----------------Requete classique---------------------------------------------------
 
@@ -125,7 +138,7 @@ def add_friend(request, player1_id, player2_id):
     if Friend.objects.filter(Player1=player1, Player2=player2).exists() or Friend.objects.filter(Player1=player2, Player2=player1).exists():
         return Response(status=409)  
 
-    friend = Friend.objects.create(Player1=player1, Player2=player2)
+    friend = Friend.objects.create(Player1=player1, Player2=player2, who_ask=player1)
     friend.save()
 
     serializer = FriendSerializers(friend)

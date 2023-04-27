@@ -49,17 +49,19 @@ class PlayerSerializers(serializers.ModelSerializer):
         friends = Friend.objects.filter(Q(Player1=obj) | Q(Player2=obj), accepting=False)
         friend_data = []
         for friend in friends:
+            id = friend.id
+            who_ask = friend.who_ask
             if friend.Player1 == obj:
                 friend_username = friend.Player2.username
-                id = friend.id
+                
                 player_id = friend.Player2.id
             else:
                 friend_username = friend.Player1.username
-                id = friend.id
                 player_id = friend.Player1.id
             friend_data.append({'username': friend_username,
                                 'player_id': player_id,
-                                'asc_id': id})
+                                'asc_id': id,
+                                'who_asc': who_ask})
         return friend_data
 
 
@@ -79,7 +81,6 @@ class PartySerializers(serializers.ModelSerializer):
         source='Founder',
         write_only=True
     )
-
     class Meta:
         model = Party
         fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at', 'participant_party', 'founder_id']

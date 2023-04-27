@@ -10,6 +10,7 @@ class Player(AbstractUser):
 class Friend(models.Model): 
     Player1 = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='friend1')
     Player2 = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='friend2')
+    who_ask = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='ask', null=True)
 
     #Si false -> juste une invitation 
     accepting = models.BooleanField(default=False)
