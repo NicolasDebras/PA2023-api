@@ -15,11 +15,12 @@ class FriendSerializers(serializers.ModelSerializer):
 
 class PlayerSerializers(serializers.ModelSerializer):
     friends = serializers.SerializerMethodField()
+    invit = serializers.SerializerMethodField()
 
     class Meta:
         User = get_user_model()
         model = User
-        fields = ('id', 'username', 'password', 'email', 'first_name', 'last_name', 'commentaire', 'url_image' ,'friends')
+        fields = ('id', 'username', 'password', 'email', 'first_name', 'last_name', 'commentaire', 'url_image' ,'friends', 'invit')
         extra_kwargs = {'password': {'write_only': True, 'required': False}}
 
     def create(self, validated_data):
@@ -33,12 +34,32 @@ class PlayerSerializers(serializers.ModelSerializer):
         for friend in friends:
             if friend.Player1 == obj:
                 friend_username = friend.Player2.username
-                id = friend.Player2.id
+                id = friend.id
+                player_id = friend.Player2.id
             else:
                 friend_username = friend.Player1.username
-                id = friend.Player1.id
+                id = friend.id
+                player_id = friend.Player1.id
             friend_data.append({'username': friend_username,
-                                'id': id})
+                                'player_id': player_id,
+                                'asc_id': id})
+        return friend_data
+    
+    def get_invit(self, obj):
+        friends = Friend.objects.filter(Q(Player1=obj) | Q(Player2=obj), accepting=False)
+        friend_data = []
+        for friend in friends:
+            if friend.Player1 == obj:
+                friend_username = friend.Player2.username
+                id = friend.id
+                player_id = friend.Player2.id
+            else:
+                friend_username = friend.Player1.username
+                id = friend.id
+                player_id = friend.Player1.id
+            friend_data.append({'username': friend_username,
+                                'player_id': player_id,
+                                'asc_id': id})
         return friend_data
 
 
