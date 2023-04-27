@@ -72,7 +72,7 @@ class MyPartyView(APIView):
             participated_parties = Party.objects.filter(participant_party__player_id=id_player)
 
             # On pagine les résultats ici
-            parties = founded_parties.union(participated_parties).order_by('-id')
+            parties = founded_parties.union(participated_parties).order_by('id')
             parties_page = self.pagination_class.paginate_queryset(parties, request)
 
             serialized_parties = PartySerializers(parties_page, many=True).data
