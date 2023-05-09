@@ -20,6 +20,19 @@ application = get_wsgi_application()
 import django
 django.setup()
 
+from django.core.asgi import get_asgi_application
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+import server_chat.routing
 
+
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    "websocket": AuthMiddlewareStack(
+        URLRouter(
+            server_chat.routing.websocket_urlpatterns
+        )
+    ),
+})
 
 
