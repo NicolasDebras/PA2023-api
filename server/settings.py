@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-!zp^3i2@#n@zkrjsc)i6h*k=49i!4p9rt$ihyuhvl9a6s5)qpo
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['api-pa2023.herokuapp.com', '127.0.0.1']
+ALLOWED_HOSTS = ['api-pa2023.herokuapp.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -43,6 +43,15 @@ INSTALLED_APPS = [
     'server_chat',
     'channels',
 ]
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
