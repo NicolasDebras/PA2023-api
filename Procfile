@@ -1,1 +1,1 @@
-web: gunicorn server.wsgi --log-file - 
+web: uvicorn server.asgi:application --log-file - 
