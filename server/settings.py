@@ -44,11 +44,22 @@ INSTALLED_APPS = [
     'channels',
 ]
 
+
+# localhost 
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             'hosts': [('127.0.0.1', 6379)],
+#         },
+#     },
+# }
+# heroku server  
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],
+            'hosts': [('redis://:p117d5605b2e69f221be5e8bf7ce383c353d010dd669dd73f68e760d6a8b042d1@ec2-18-202-76-141.eu-west-1.compute.amazonaws.com:21249', 6379)],
         },
     },
 }
