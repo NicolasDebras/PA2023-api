@@ -34,3 +34,11 @@ class Participant(models.Model):
     accepting = models.BooleanField(default=False)
 
 
+class Message(models.Model):
+    party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='sent_messages')
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Message by {self.sender.username} in {self.party.title}'
