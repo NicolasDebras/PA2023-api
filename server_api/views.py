@@ -1,6 +1,6 @@
-from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers
+from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers, MessageSerializers
 from .permissions import IsCreationOrIsAuthenticated, IsViewOrIsAuthenticated
-from .models import Friend, Player, Party, Participant
+from .models import Friend, Player, Party, Participant, Message
 
 
 from rest_framework.response import Response
@@ -175,6 +175,18 @@ def patybyuser(request, user_id):
 
     serializer = PartySerializers(party)
     return Response(serializer.data)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+def MessageByUser(request, party_id):
+    try:
+        messages = Message.objects.filter(party_id=party_id).order_by('-timestamp')[:10]
+    except Message.DoesNotExist:
+        return Response(status=404)
+
+    serializer = MessageSerializers(messages, many=True)
+    return Response(serializer.data)
+
 
 
 

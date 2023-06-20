@@ -4,7 +4,7 @@ from .models import Friend, Participant, Party
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from rest_framework import serializers
-from .models import Friend, Participant, Party, Player
+from .models import Friend, Participant, Party, Player, Message
 from django.db.models import Q
 
 class FriendSerializers(serializers.ModelSerializer):
@@ -119,6 +119,13 @@ class PartySerializers(serializers.ModelSerializer):
 
         return party
 
+
+class MessageSerializers(serializers.ModelSerializer):
+    sender = LessPlayerSerializers()  # Nested serializer for sender field
+
+    class Meta:
+        model = Message
+        fields = ('sender', 'content', 'timestamp')
 
 
 ## To do for reset

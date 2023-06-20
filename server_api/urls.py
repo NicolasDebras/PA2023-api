@@ -18,6 +18,7 @@ urlpatterns = [
     path('addfriend/<int:player1_id>/<int:player2_id>/', views.add_friend),
     path('acceptfriend/<int:friend_id>/', views.accept_friendship),
     path('partyfilter/<int:user_id>/', views.patybyuser),
-    path('myparty/<int:id_player>/', views.MyPartyView.as_view())
+    path('myparty/<int:id_player>/', views.MyPartyView.as_view()),
+    path('message/<int:party_id>/', views.MessageByUser)
 ]
 urlpatterns += router.urls
