@@ -19,6 +19,8 @@ class Party(models.Model):
     title = models.CharField(max_length=50)
     Founder = models.ForeignKey(Player, related_name='founder', on_delete=models.CASCADE)
     url_image = models.CharField(max_length=500, null=True)
+    url_game = models.CharField(max_length=500, null=True)
+    start = models.BooleanField(default=False)
 
     #si false -> partie pas encore commencé 
     started = models.BooleanField(default=False)
@@ -42,3 +44,12 @@ class Message(models.Model):
 
     def __str__(self):
         return f'Message by {self.sender.username} in {self.party.title}'
+    
+
+class Play(models.Model):
+    infoSend = models.CharField(max_length=5000)
+    date_creation = models.DateTimeField(auto_now_add=True, null=True)
+
+    #lien avec le joueur 
+    player = models.ForeignKey(Player, related_name='player_play', null=True,  on_delete=models.CASCADE)
+    party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name='fk_game_partie')
