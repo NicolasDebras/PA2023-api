@@ -18,13 +18,17 @@ def string_to_dictlist(chaine):
 def run_in_sandbox(file, inputs):
     res = []
 
-    # Construit l'image Docker
-    build_process = subprocess.Popen(["docker", "build", "-t", "python-sandbox", "."], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = build_process.communicate()
+    # Vérifie si l'image Docker existe
+    check_image = subprocess.run(['docker', 'images', '-q', 'python-sandbox'])
+    
+    # Si l'image Docker n'existe pas, la construit
+    if check_image.returncode != 0:
+        build_process = subprocess.Popen(["docker", "build", "-t", "python-sandbox", "."], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = build_process.communicate()
 
-    if build_process.returncode != 0:
-        print(f"Erreur lors de la construction de Docker: {stderr.decode()}")
-        return
+        if build_process.returncode != 0:
+            print(f"Erreur lors de la construction de Docker: {stderr.decode()}")
+            return
 
     # Prépare toutes les données à envoyer
     json_inputs = '\n'.join(json.dumps(input_data) for input_data in inputs) + '\n'
