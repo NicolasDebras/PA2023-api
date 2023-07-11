@@ -12,6 +12,30 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='participant',
+            name='tag_player',
+            field=models.CharField(max_length=500, null=True),
+        ),
+        migrations.AddField(
+            model_name='party',
+            name='start',
+            field=models.BooleanField(default=False),
+        ),
+        migrations.AddField(
+            model_name='party',
+            name='url_game',
+            field=models.CharField(max_length=500, null=True),
+        ),
+        migrations.CreateModel(
+            name='Play',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('infoSend', models.CharField(max_length=5000)),
+                ('date_creation', models.DateTimeField(auto_now_add=True, null=True)),
+                ('party', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='fk_game_partie', to='server_api.party')),
+            ],
+        ),
         migrations.CreateModel(
             name='Message',
             fields=[

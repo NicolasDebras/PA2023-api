@@ -3,7 +3,21 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 import subprocess
 
 
-def run_in_sandbox(file, input_data):
+def string_to_dictlist(chaine):
+    chaine = chaine.strip()
+    dicts = []
+    decoder = json.JSONDecoder()
+    while chaine:
+        dict_, idx = decoder.raw_decode(chaine)
+        dicts.append(dict_)
+        chaine = chaine[idx:].strip()
+    print(dicts)
+    return dicts
+
+
+def run_in_sandbox(file, inputs):
+    res = []
+
     # Construit l'image Docker
     build_process = subprocess.Popen(["docker", "build", "-t", "python-sandbox", "."], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = build_process.communicate()
@@ -12,20 +26,19 @@ def run_in_sandbox(file, input_data):
         print(f"Erreur lors de la construction de Docker: {stderr.decode()}")
         return
 
-    # Encode la donnée en JSON
-    json_input = json.dumps(input_data) + "\n"
+    # Prépare toutes les données à envoyer
+    json_inputs = '\n'.join(json.dumps(input_data) for input_data in inputs) + '\n'
 
     # Exécute le script Python dans un nouveau conteneur Docker
     run_process = subprocess.Popen(["docker", "run", "-i", "python-sandbox", "python3", file], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = run_process.communicate(input=json_input.encode())
-    print(f"Sortie de morpion.py:\n{stdout.decode()}")
-
-    res = stdout.decode()
-
+    stdout, stderr = run_process.communicate(input=json_inputs.encode())
+    print("-------------------------------------")
+    res = string_to_dictlist(stdout.decode())
+    ##print(stdout.decode())
+    print("-------------------------------------")
     if run_process.returncode != 0:
         print(f"Erreur lors de l'exécution de Docker: {stderr.decode()}")
     else:
-        # Afficher la sortie standard de morpion.py
-        print(f"Sortie de morpion.py:\n{stdout.decode()}")
+        print("victoire")
 
     return res

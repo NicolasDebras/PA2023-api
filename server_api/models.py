@@ -19,6 +19,7 @@ class Party(models.Model):
     title = models.CharField(max_length=50)
     Founder = models.ForeignKey(Player, related_name='founder', on_delete=models.CASCADE)
     url_image = models.CharField(max_length=500, null=True)
+    type = models.CharField(max_length=500, null=True) 
     url_game = models.CharField(max_length=500, null=True)
     start = models.BooleanField(default=False)
 
@@ -31,6 +32,7 @@ class Party(models.Model):
 class Participant(models.Model):
     party = models.ForeignKey(Party, related_name='participant_party', on_delete=models.CASCADE)
     player = models.ForeignKey(Player, related_name='participant_player', on_delete=models.CASCADE)
+    tag_player =  models.CharField(max_length=500, null=True)
 
     #Si false -> juste une invitation 
     accepting = models.BooleanField(default=False)
@@ -51,5 +53,4 @@ class Play(models.Model):
     date_creation = models.DateTimeField(auto_now_add=True, null=True)
 
     #lien avec le joueur 
-    player = models.ForeignKey(Player, related_name='player_play', null=True,  on_delete=models.CASCADE)
     party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name='fk_game_partie')
