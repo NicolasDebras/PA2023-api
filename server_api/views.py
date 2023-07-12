@@ -207,13 +207,13 @@ def patybyuser(request, user_id):
 @authentication_classes([TokenAuthentication])
 def MessageByUser(request, party_id):
     try:
-        messages = Message.objects.filter(party_id=party_id).order_by('-timestamp')[:10]
+        messages = list(Message.objects.filter(party_id=party_id).order_by('-timestamp')[:10])
+        messages.reverse()
     except Message.DoesNotExist:
         return Response(status=404)
 
     serializer = MessageSerializers(messages, many=True)
     return Response(serializer.data)
-
 
 
 
