@@ -175,6 +175,22 @@ def OneParty(request, party_id):
     serializer = FullPartySerializers(party)
     return Response(serializer.data)
 
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_party(request, party_id):
+    try:
+        party = Party.objects.get(id=party_id)
+    except Party.DoesNotExist:
+        return Response({"error": "Party not found"}, status=404)
+
+    serializer = PartySerializers(party, data=request.data, partial=True)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors, status=404)
+
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -191,7 +207,7 @@ def patybyuser(request, user_id):
 @authentication_classes([TokenAuthentication])
 def MessageByUser(request, party_id):
     try:
-        messages = Message.objects.filter(party_id=party_id).order_by('timestamp')[:10]
+        messages = Message.objects.filter(party_id=party_id).order_by('-timestamp')[:10]
     except Message.DoesNotExist:
         return Response(status=404)
 
