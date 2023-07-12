@@ -4,7 +4,7 @@ from .models import Friend, Participant, Party
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from rest_framework import serializers
-from .models import Friend, Participant, Party, Player, Message
+from .models import Friend, Participant, Party, Player, Message, ArgumentParty
 from django.db.models import Q
 
 class FriendSerializers(serializers.ModelSerializer):
@@ -12,6 +12,10 @@ class FriendSerializers(serializers.ModelSerializer):
         model = Friend
         fields = '__all__'
 
+class ArgumentPartySerializers(serializers.ModelSerializer):
+    class Meta:
+        model = ArgumentParty
+        fields = '__all__'
 
 class LessPlayerSerializers(serializers.ModelSerializer):
     class Meta:
@@ -86,6 +90,13 @@ class ParticipantSerializers(serializers.ModelSerializer):
         model = Participant
         fields = ['id', 'accepting', 'player']
 
+class AcceptParticipantSerializers(serializers.ModelSerializer): 
+    player = LessPlayerSerializers(allow_null=True, read_only=True)
+
+    class Meta:
+        model = Participant
+        fields = ['id', 'player', 'tag_player', 'point']
+
 
 class PartySerializers(serializers.ModelSerializer):
     accepting_participants = serializers.SerializerMethodField()
@@ -103,7 +114,7 @@ class PartySerializers(serializers.ModelSerializer):
 
     def get_accepting_participants(self, obj):
         accepting_participants = Participant.objects.filter(party=obj, accepting=True)
-        return ParticipantSerializers(accepting_participants, many=True).data
+        return AcceptParticipantSerializers(accepting_participants, many=True).data
 
     def get_pending_participants(self, obj):
         pending_participants = Participant.objects.filter(party=obj, accepting=False)
@@ -118,6 +129,33 @@ class PartySerializers(serializers.ModelSerializer):
             party.save()
 
         return party
+
+class FullPartySerializers(serializers.ModelSerializer):
+    accepting_participants = serializers.SerializerMethodField()
+    pending_participants = serializers.SerializerMethodField()
+    argument = serializers.SerializerMethodField()
+    Founder = LessPlayerSerializers(read_only=True)
+    founder_id = serializers.PrimaryKeyRelatedField(
+        queryset=Player.objects.all(),
+        source='Founder',
+        write_only=True
+    )
+    class Meta:
+        model = Party
+        fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at', 'accepting_participants', 'pending_participants', 'founder_id', 'url_game', 'language', 'argument']
+        read_only_fields = ['Founder']
+
+    def get_accepting_participants(self, obj):
+        accepting_participants = Participant.objects.filter(party=obj, accepting=True)
+        return AcceptParticipantSerializers(accepting_participants, many=True).data
+
+    def get_pending_participants(self, obj):
+        pending_participants = Participant.objects.filter(party=obj, accepting=False)
+        return ParticipantSerializers(pending_participants, many=True).data
+
+    def get_argument(self, obj):
+        argument = ArgumentParty.objects.filter(party=obj, accepting=False)
+        return ArgumentPartySerializers(argument, many=True).data
 
 
 class MessageSerializers(serializers.ModelSerializer):

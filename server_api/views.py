@@ -1,4 +1,4 @@
-from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers, MessageSerializers
+from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers, MessageSerializers, FullPartySerializers
 from .permissions import IsCreationOrIsAuthenticated, IsViewOrIsAuthenticated
 from .models import Friend, Player, Party, Participant, Message
 
@@ -162,6 +162,17 @@ def accept_friendship(request, friend_id):
     friend.save()
 
     serializer = FriendSerializers(friend)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+def OneParty(request, party_id):
+    try:
+        party = Party.objects.getAll(id=party_id)
+    except:
+        return Response(status=404)
+
+    serializer = FullPartySerializers(party)
     return Response(serializer.data)
 
 
