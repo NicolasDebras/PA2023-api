@@ -9,6 +9,22 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['party_id']
         await self.accept()
+        plays = await self.fetch_plays()
+        all_data = []
+        for play in plays:
+            all_data.append(play.infoSend)
+        if all_data:
+            list_dict = [json.loads(i) for i in all_data]
+            print(list_dict)
+            response = sundox.run_in_sandbox("./app/morpion.py", list_dict)
+            if not response:
+                await self.send(text_data=json.dumps('{"errors":"erreur dans la gestion du docker"}'))
+                return
+            if not isinstance(response[-1], dict):
+                await self.send(text_data=json.dumps('{"errors":"retour du docker pas un dictionnaire"}'))
+                return
+            response_data = response[-1]
+            await self.send(text_data=json.dumps(response_data))
 
     async def disconnect(self, close_code):
         pass
