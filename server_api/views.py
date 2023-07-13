@@ -168,7 +168,7 @@ def accept_friendship(request, friend_id):
 @authentication_classes([TokenAuthentication])
 def OneParty(request, party_id):
     try:
-        party = Party.objects.getAll(id=party_id)
+        party = Party.objects.get(id=party_id)
     except:
         return Response(status=404)
 

@@ -175,7 +175,7 @@ class FullPartySerializers(serializers.ModelSerializer):
         return ParticipantSerializers(pending_participants, many=True).data
 
     def get_argument(self, obj):
-        argument = ArgumentParty.objects.filter(party=obj, accepting=False)
+        argument = ArgumentParty.objects.filter(party=obj)
         return ArgumentPartySerializers(argument, many=True).data
 
 
