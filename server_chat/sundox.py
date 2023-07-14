@@ -19,10 +19,10 @@ def run_in_sandbox(file, inputs):
     res = []
 
     # Vérifie si l'image Docker existe
-    check_image = subprocess.run(['docker', 'images', '-q', 'python-sandbox'])
+    check_image = subprocess.run(['docker', 'images', '-q', 'python-sandbox'], capture_output=True, text=True)
     
     # Si l'image Docker n'existe pas, la construit
-    if check_image.returncode != 0:
+    if not check_image.stdout:
         build_process = subprocess.Popen(["docker", "build", "-t", "python-sandbox", "."], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = build_process.communicate()
 
