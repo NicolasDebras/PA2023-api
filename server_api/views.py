@@ -176,7 +176,6 @@ def OneParty(request, party_id):
     return Response(serializer.data)
 
 @api_view(['PATCH'])
-@permission_classes([IsAuthenticated])
 def update_party(request, party_id):
     try:
         party = Party.objects.get(id=party_id)
