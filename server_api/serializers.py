@@ -181,6 +181,7 @@ class FullPartySerializers(serializers.ModelSerializer):
 
 class MessageSerializers(serializers.ModelSerializer):
     sender = LessPlayerSerializers()  # Nested serializer for sender field
+    content = serializers.CharField(allow_blank=True)
 
     class Meta:
         model = Message

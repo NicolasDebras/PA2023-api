@@ -97,7 +97,10 @@ DATABASES = {
         'USER': 'PA',
         'PASSWORD': '7*z%N6Im_Ust10L-',
         'HOST': '91.121.230.45',
-        'PORT': '3306'
+        'PORT': '3306',
+        'OPTIONS': {
+                    'charset': 'utf8mb4',
+                    'use_unicode': True, },
     }
 }
 

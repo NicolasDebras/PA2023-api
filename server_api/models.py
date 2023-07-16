@@ -48,7 +48,7 @@ class Participant(models.Model):
 class Message(models.Model):
     party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='sent_messages')
-    content = models.TextField()
+    content = models.TextField(db_collation='utf8mb4_general_ci')
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
