@@ -21,6 +21,7 @@ class Party(models.Model):
     url_image = models.CharField(max_length=500, null=True)
     language = models.CharField(max_length=500, null=True) 
     url_game = models.CharField(max_length=500, null=True)
+    max_player = models.IntegerField(null=True)
 
     #si false -> partie pas encore commencé 
     started = models.BooleanField(default=False)

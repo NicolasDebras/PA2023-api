@@ -64,6 +64,7 @@ class PlayerSerializers(serializers.ModelSerializer):
         instance.language = validated_data.get('language', instance.language)
         instance.url_game = validated_data.get('url_game', instance.url_game)
         instance.started = validated_data.get('started', instance.started)
+        instance.max_player = validated_data.get('started', instance.started)
         instance.save()
 
         # Update Participants tag_player field
