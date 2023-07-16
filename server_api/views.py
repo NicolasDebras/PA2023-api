@@ -183,7 +183,7 @@ def update_party(request, party_id):
     except Party.DoesNotExist:
         return Response({"error": "Party not found"}, status=404)
 
-    serializer = PartySerializers(party, data=request.data, partial=True)
+    serializer = FullPartySerializers(party, data=request.data, partial=True)
 
     if serializer.is_valid():
         serializer.save()

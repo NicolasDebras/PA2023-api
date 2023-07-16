@@ -59,28 +59,6 @@ class PlayerSerializers(serializers.ModelSerializer):
                                 'url_image': url_image,})
         return friend_data
     
-    def update(self, instance, validated_data):
-        # Update Party instance
-        instance.language = validated_data.get('language', instance.language)
-        instance.url_game = validated_data.get('url_game', instance.url_game)
-        instance.started = validated_data.get('started', instance.started)
-        instance.max_player = validated_data.get('started', instance.started)
-        instance.save()
-
-        # Update Participants tag_player field
-        participants_data = validated_data.pop('participants', [])
-        for participant_data in participants_data:
-            participant = Participant.objects.get(id=participant_data['id'])
-            participant.tag_player = participant_data.get('tag_player', participant.tag_player)
-            participant.save()
-
-        # Add new ArgumentParty instances
-        argument_parties_data = validated_data.pop('argument_parties', [])
-        for argument_party_data in argument_parties_data:
-            ArgumentParty.objects.create(party=instance, **argument_party_data)
-
-        return instance
-    
     def get_invit(self, obj):
         friends = Friend.objects.filter(Q(Player1=obj) | Q(Player2=obj), accepting=False)
         friend_data = []
@@ -178,6 +156,29 @@ class FullPartySerializers(serializers.ModelSerializer):
     def get_argument(self, obj):
         argument = ArgumentParty.objects.filter(party=obj)
         return ArgumentPartySerializers(argument, many=True).data
+    
+    def update(self, instance, validated_data):
+        # Update Party instance
+        instance.language = validated_data.get('language', instance.language)
+        instance.url_game = validated_data.get('url_game', instance.url_game)
+        instance.started = validated_data.get('started', instance.started)
+        instance.max_player = validated_data.get('max_player', instance.max_player)
+        instance.save()
+
+        # Update Participants tag_player field
+        participants_data = validated_data.pop('participants', [])
+        for participant_data in participants_data:
+            participant = Participant.objects.get(id=participant_data['id'])
+            participant.tag_player = participant_data.get('tag_player', participant.tag_player)
+            participant.save()
+
+        # Add new ArgumentParty instances
+        argument_parties_data = validated_data.pop('argument_parties', [])
+        for argument_party_data in argument_parties_data:
+            ArgumentParty.objects.create(party=instance, **argument_party_data)
+
+        return instance
+    
 
 
 class MessageSerializers(serializers.ModelSerializer):
