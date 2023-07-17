@@ -7,3 +7,4 @@ server/Scripts/
 .server\Lib\
 .server\Scripts\
 *.cfg
+*.rdb

@@ -107,6 +107,7 @@ class PartySerializers(serializers.ModelSerializer):
         source='Founder',
         write_only=True
     )
+
     class Meta:
         model = Party
         fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at', 'accepting_participants', 'pending_participants', 'founder_id']
@@ -121,19 +122,18 @@ class PartySerializers(serializers.ModelSerializer):
         return ParticipantSerializers(pending_participants, many=True).data
 
     def create(self, validated_data):
-        founder_id = validated_data.pop('Founder_id', None)
         party = Party.objects.create(**validated_data)
-
-        if founder_id:
-            party.Founder = founder_id
-            party.save()
+        founder = Player.objects.filter(username=validated_data["Founder"]).first()
+        Participant.objects.create(party=party, player=founder, accepting=True)
+        
 
         return party
 
+
+
 class FullPartySerializers(serializers.ModelSerializer):
-    accepting_participants = serializers.SerializerMethodField()
-    pending_participants = serializers.SerializerMethodField()
-    argument = serializers.SerializerMethodField()
+    participant_party = AcceptParticipantSerializers(many=True)
+    fk_game_argument = ArgumentPartySerializers(many=True)
     Founder = LessPlayerSerializers(read_only=True)
     founder_id = serializers.PrimaryKeyRelatedField(
         queryset=Player.objects.all(),
@@ -142,22 +142,24 @@ class FullPartySerializers(serializers.ModelSerializer):
     )
     class Meta:
         model = Party
-        fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at', 'accepting_participants', 'pending_participants', 'founder_id', 'url_game', 'language', 'argument']
+        fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at', 'participant_party', 'founder_id', 'url_game', 'language', 'fk_game_argument', 'max_player']
         read_only_fields = ['Founder']
 
-    def get_accepting_participants(self, obj):
-        accepting_participants = Participant.objects.filter(party=obj, accepting=True)
-        return AcceptParticipantSerializers(accepting_participants, many=True).data
-
-    def get_pending_participants(self, obj):
-        pending_participants = Participant.objects.filter(party=obj, accepting=False)
-        return ParticipantSerializers(pending_participants, many=True).data
-
-    def get_argument(self, obj):
-        argument = ArgumentParty.objects.filter(party=obj)
-        return ArgumentPartySerializers(argument, many=True).data
-    
     def update(self, instance, validated_data):
+        # Update Participants tag_player field
+        participants_data = validated_data.pop('participants', [])
+        for participant_data in participants_data:
+            if 'id' in participant_data:
+                print(participant_data['id'])
+                participant = Participant.objects.get(id=participant_data['id'])
+                participant.tag_player = participant_data.get('tag_player', participant.tag_player)
+                participant.save()
+
+        # Add new ArgumentParty instances
+        argument_parties_data = validated_data.pop('argument_parties', [])
+        for argument_party_data in argument_parties_data:
+            ArgumentParty.objects.create(party=instance, **argument_party_data)
+
         # Update Party instance
         instance.language = validated_data.get('language', instance.language)
         instance.url_game = validated_data.get('url_game', instance.url_game)
@@ -165,19 +167,8 @@ class FullPartySerializers(serializers.ModelSerializer):
         instance.max_player = validated_data.get('max_player', instance.max_player)
         instance.save()
 
-        # Update Participants tag_player field
-        participants_data = validated_data.pop('participants', [])
-        for participant_data in participants_data:
-            participant = Participant.objects.get(id=participant_data['id'])
-            participant.tag_player = participant_data.get('tag_player', participant.tag_player)
-            participant.save()
-
-        # Add new ArgumentParty instances
-        argument_parties_data = validated_data.pop('argument_parties', [])
-        for argument_party_data in argument_parties_data:
-            ArgumentParty.objects.create(party=instance, **argument_party_data)
-
         return instance
+
     
 
 

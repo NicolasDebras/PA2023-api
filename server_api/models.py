@@ -39,7 +39,7 @@ class ArgumentParty(models.Model):
 class Participant(models.Model):
     party = models.ForeignKey(Party, related_name='participant_party', on_delete=models.CASCADE)
     player = models.ForeignKey(Player, related_name='participant_player', on_delete=models.CASCADE)
-    tag_player =  models.CharField(max_length=500, null=True)
+    tag_player =  models.IntegerField(null=True)
     point = models.IntegerField(null=True)
 
     #Si false -> juste une invitation 
