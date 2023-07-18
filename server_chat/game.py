@@ -1,5 +1,4 @@
 import json
-from pickle import FALSE
 from . import sundox
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server_api.models import Party, Play
@@ -8,26 +7,38 @@ from asgiref.sync import sync_to_async
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['party_id']
+        self.room_group_name = 'chat_%s' % self.room_name
+
+        # Join room group
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
         await self.accept()
+
         plays = await self.fetch_plays()
         all_data = []
         for play in plays:
             all_data.append(play.infoSend)
         if all_data:
             list_dict = [json.loads(i) for i in all_data]
-            print(list_dict)
             response = sundox.run_in_sandbox("./app/morpion.py", list_dict)
             if not response:
-                await self.send(text_data=json.dumps('{"errors":"erreur dans la gestion du docker"}'))
+                await self.group_send_message('{"errors":"erreur dans la gestion du docker"}')
                 return
             if not isinstance(response[-1], dict):
-                await self.send(text_data=json.dumps('{"errors":"retour du docker pas un dictionnaire"}'))
+                await self.group_send_message('{"errors":"retour du docker pas un dictionnaire"}')
                 return
             response_data = response[-1]
-            await self.send(text_data=json.dumps(response_data))
+            await self.group_send_message(response_data)
 
     async def disconnect(self, close_code):
-        pass
+        # Leave room group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
 
     async def receive(self, text_data):
         all_data = []
@@ -35,26 +46,25 @@ class GameConsumer(AsyncWebsocketConsumer):
         if "init" in text_data:
             await self.clear_play()
         else:
-            print("recupere tous infoSend précedent")
             plays = await self.fetch_plays()
             for play in plays:
                 all_data.append(play.infoSend)
 
         all_data.append(text_data)
-        print(all_data)
         list_dict = [json.loads(i) for i in all_data]
         response = sundox.run_in_sandbox("./app/morpion.py", list_dict)
-        print("docker passé")
         if not response:
-            await self.send(text_data=json.dumps('{"errors":"erreur dans la gestion du docker"}'))
+            await self.group_send_message('{"errors":"erreur dans la gestion du docker"}')
             return
         if not isinstance(response[-1], dict):
-            await self.send(text_data=json.dumps('{"errors":"retour du docker pas un dictionnaire"}'))
+            await self.group_send_message('{"errors":"retour du docker pas un dictionnaire"}')
             return
         response_data = response[-1]
-        await self.send(text_data=json.dumps(response_data))
         if "errors" not in response_data:
+            await self.group_send_message(response_data)
             await self.save_play(text_data)
+        else:
+           await self.send(response_data) 
 
     async def save_play(self, info_send):
         party_id = int(self.room_name)
@@ -76,3 +86,18 @@ class GameConsumer(AsyncWebsocketConsumer):
         plays = await sync_to_async(Play.objects.filter)(party=party)
         await sync_to_async(plays.delete)()
 
+    async def group_send_message(self, message):
+        # Send message to room group
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'game_message',
+                'message': message
+            }
+        )
+
+    async def game_message(self, event):
+        message = event['message']
+
+        # Send message to WebSocket
+        await self.send(text_data=json.dumps(message))
