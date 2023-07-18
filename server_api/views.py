@@ -204,13 +204,12 @@ def update_party(request, party_id):
     party.url_game = data.get('url_game', party.url_game)
     party.language = data.get('language', party.language)
     party.max_player = data.get('max_player', party.max_player)
+    party.started = True
     party.save()
 
-    return Response({
-        'url_game': party.url_game,
-        'language': party.language,
-        'max_player': party.max_player
-    })
+    serializer = FullPartySerializers(party)
+
+    return Response(serializer.data)
 
 
 
