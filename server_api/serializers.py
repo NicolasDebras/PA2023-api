@@ -129,9 +129,32 @@ class PartySerializers(serializers.ModelSerializer):
 
         return party
 
-
-
 class FullPartySerializers(serializers.ModelSerializer):
+    accepting_participants = serializers.SerializerMethodField()
+    pending_participants = serializers.SerializerMethodField()
+    fk_game_argument = ArgumentPartySerializers(many=True)
+    Founder = LessPlayerSerializers(read_only=True)
+    founder_id = serializers.PrimaryKeyRelatedField(
+        queryset=Player.objects.all(),
+        source='Founder',
+        write_only=True
+    )
+    class Meta:
+        model = Party
+        fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at', 'accepting_participants', 'pending_participants', 'founder_id', 'url_game', 'language', 'fk_game_argument', 'max_player']
+        read_only_fields = ['Founder']
+
+    def get_accepting_participants(self, obj):
+        accepting_participants = Participant.objects.filter(party=obj, accepting=True)
+        return AcceptParticipantSerializers(accepting_participants, many=True).data
+
+    def get_pending_participants(self, obj):
+        pending_participants = Participant.objects.filter(party=obj, accepting=False)
+        return ParticipantSerializers(pending_participants, many=True).data
+    
+    
+
+class CreatePartySerializers(serializers.ModelSerializer):
     participant_party = AcceptParticipantSerializers(many=True)
     fk_game_argument = ArgumentPartySerializers(many=True)
     Founder = LessPlayerSerializers(read_only=True)
