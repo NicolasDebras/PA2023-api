@@ -1,4 +1,4 @@
-from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers, MessageSerializers, FullPartySerializers
+from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers, MessageSerializers, FullPartySerializers, PartyPatchSerializer, ArgumentPartySerializers, ParticipantSerializer
 from .permissions import IsCreationOrIsAuthenticated, IsViewOrIsAuthenticated
 from .models import Friend, Player, Party, Participant, Message
 
@@ -175,6 +175,8 @@ def OneParty(request, party_id):
     serializer = FullPartySerializers(party)
     return Response(serializer.data)
 
+import json
+
 @api_view(['PATCH'])
 def update_party(request, party_id):
     try:
@@ -182,13 +184,34 @@ def update_party(request, party_id):
     except Party.DoesNotExist:
         return Response({"error": "Party not found"}, status=404)
 
-    serializer = FullPartySerializers(party, data=request.data, partial=True)
+    # Extraction des données de la requête
+    data = json.loads(request.body)
+    participants_data = data.get('participants', [])
+    argument_parties_data = data.get('argument_parties', [])
 
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    else:
-        return Response(serializer.errors, status=404)
+    # Serializer pour les participants
+    for pt in participants_data:
+        try:
+            p = Participant.objects.get(id=pt['id'])
+        except p.DoesNotExist:
+            return Response({"error": "Party not found"}, status=404)
+        
+        p.tag_player = pt['tag_player']
+        p.save()
+        
+
+    # Mise à jour de la Party avec les données modifiées
+    party.url_game = data.get('url_game', party.url_game)
+    party.language = data.get('language', party.language)
+    party.max_player = data.get('max_player', party.max_player)
+    party.save()
+
+    return Response({
+        'url_game': party.url_game,
+        'language': party.language,
+        'max_player': party.max_player
+    })
+
 
 
 @api_view(['GET'])

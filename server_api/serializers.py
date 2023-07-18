@@ -15,7 +15,7 @@ class FriendSerializers(serializers.ModelSerializer):
 class ArgumentPartySerializers(serializers.ModelSerializer):
     class Meta:
         model = ArgumentParty
-        fields = '__all__'
+        fields = ['id', 'name', 'value', 'type']
 
 class LessPlayerSerializers(serializers.ModelSerializer):
     class Meta:
@@ -154,45 +154,39 @@ class FullPartySerializers(serializers.ModelSerializer):
     
     
 
-class CreatePartySerializers(serializers.ModelSerializer):
-    participant_party = AcceptParticipantSerializers(many=True)
-    fk_game_argument = ArgumentPartySerializers(many=True)
-    Founder = LessPlayerSerializers(read_only=True)
-    founder_id = serializers.PrimaryKeyRelatedField(
-        queryset=Player.objects.all(),
-        source='Founder',
-        write_only=True
-    )
+class ParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Participant
+        fields = ['id', 'tag_player']
+
+class PartyPatchSerializer(serializers.ModelSerializer):
+    participants = ParticipantSerializer(many=True)
+    argument_parties = ArgumentPartySerializers(many=True, required=False)
+
     class Meta:
         model = Party
-        fields = ['id', 'title', 'Founder', 'url_image', 'started', 'created_at', 'participant_party', 'founder_id', 'url_game', 'language', 'fk_game_argument', 'max_player']
-        read_only_fields = ['Founder']
+        fields = ['url_game', 'language', 'max_player', 'participants', 'argument_parties']
+
+    
 
     def update(self, instance, validated_data):
-        # Update Participants tag_player field
+
         participants_data = validated_data.pop('participants', [])
+        argument_parties_data = validated_data.pop('argument_parties', None)  # Check if argument_parties is provided
+        instance = super().update(instance, validated_data)
+
         for participant_data in participants_data:
-            if 'id' in participant_data:
-                print(participant_data['id'])
-                participant = Participant.objects.get(id=participant_data['id'])
-                participant.tag_player = participant_data.get('tag_player', participant.tag_player)
-                participant.save()
+            participant = Participant.objects.get(id=participant_data['id'])
+            participant.tag_player = participant_data['tag_player']
+            participant.save()
 
-        # Add new ArgumentParty instances
-        argument_parties_data = validated_data.pop('argument_parties', [])
-        for argument_party_data in argument_parties_data:
-            ArgumentParty.objects.create(party=instance, **argument_party_data)
-
-        # Update Party instance
-        instance.language = validated_data.get('language', instance.language)
-        instance.url_game = validated_data.get('url_game', instance.url_game)
-        instance.started = validated_data.get('started', instance.started)
-        instance.max_player = validated_data.get('max_player', instance.max_player)
-        instance.save()
+        if argument_parties_data is not None and argument_parties_data:  # Only process argument_parties if it was provided and is not empty
+            ArgumentParty.objects.filter(party=instance).delete()
+            for argument_party_data in argument_parties_data:
+                ArgumentParty.objects.create(party=instance, **argument_party_data)
 
         return instance
 
-    
 
 
 class MessageSerializers(serializers.ModelSerializer):
