@@ -15,7 +15,7 @@ def string_to_dictlist(chaine):
     return dicts
 
 
-def run_in_sandbox(file, inputs):
+def run_in_sandbox(file_path, inputs):
     res = []
 
     # Vérifie si l'image Docker existe
@@ -34,7 +34,7 @@ def run_in_sandbox(file, inputs):
     json_inputs = '\n'.join(json.dumps(input_data) for input_data in inputs) + '\n'
 
     # Exécute le script Python dans un nouveau conteneur Docker
-    run_process = subprocess.Popen(["docker", "run", "-i", "python-sandbox", "python3", file], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    run_process = subprocess.Popen(["docker", "run", "-i", "-v", f"{file_path}:/app/input.py", "python-sandbox", "python3", "input.py"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = run_process.communicate(input=json_inputs.encode())
     res = string_to_dictlist(stdout.decode())
     if run_process.returncode != 0:

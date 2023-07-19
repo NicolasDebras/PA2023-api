@@ -8,3 +8,4 @@ server/Scripts/
 .server\Scripts\
 *.cfg
 *.rdb
+app/

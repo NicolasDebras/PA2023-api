@@ -4,6 +4,7 @@ from . import sundox
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server_api.models import Party, Play
 from asgiref.sync import sync_to_async
+import os
 
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -30,7 +31,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             all_data.append(play.infoSend)
         if all_data:
             list_dict = [json.loads(i) for i in all_data]
-            response = sundox.run_in_sandbox(self.url_game, list_dict)
+            response = await sync_to_async(sundox.run_in_sandbox)(os.path.abspath(self.url_game), list_dict)
             if not response:
                 await self.group_send_message('{"errors":"erreur dans la gestion du docker"}')
                 return
@@ -59,7 +60,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         all_data.append(text_data)
         list_dict = [json.loads(i) for i in all_data]
-        response = sundox.run_in_sandbox(self.url_game, list_dict)
+        response = await sync_to_async(sundox.run_in_sandbox)(os.path.abspath(self.url_game), list_dict)
         if not response:
             await self.group_send_message('{"errors":"erreur dans la gestion du docker"}')
             return
@@ -117,9 +118,10 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         return self.url_game
     
+    
     async def download_game_file(self, url):
-        local_filename = "./app/morpion.py"
-
+        local_filename = "./app/input" +self.room_group_name+ ".py"
+        
         # Envoyer une requête HTTP pour télécharger le fichier
         response = requests.get(url, stream=True)
 
