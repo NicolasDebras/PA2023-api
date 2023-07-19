@@ -1,6 +1,6 @@
 from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers, MessageSerializers, FullPartySerializers, PartyPatchSerializer, ArgumentPartySerializers, ParticipantSerializer
 from .permissions import IsCreationOrIsAuthenticated, IsViewOrIsAuthenticated
-from .models import Friend, Player, Party, Participant, Message
+from .models import Friend, Player, Party, Participant, Message, ArgumentParty
 
 
 from rest_framework.response import Response
@@ -198,7 +198,11 @@ def update_party(request, party_id):
         
         p.tag_player = pt['tag_player']
         p.save()
-        
+
+    if len(argument_parties_data) != 0:
+        for ap in argument_parties_data:
+            ArgumentParty.objects.create(party=party, value=ap['value'], type=ap['type'],name=ap['name'] )
+
 
     # Mise à jour de la Party avec les données modifiées
     party.url_game = data.get('url_game', party.url_game)
