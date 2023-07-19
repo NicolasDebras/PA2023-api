@@ -66,8 +66,13 @@ class Grid:
 			{"tag":"style", "content": "line{stroke:black;stroke-width:4;}"}
 		]
 
-        data["content"].append(self.__add_grid_lines())
-        data["content"].append(self.__add_previous_shots())
+        res = self.__add_grid_lines()
+        for r in res:
+            data["content"].append(r)
+        res = self.__add_previous_shots()
+        for r in res:
+            data["content"].append(r)
+        
         
         return data
 
