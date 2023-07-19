@@ -23,13 +23,17 @@ class Grid:
         self.__grid = [[0]*size for _ in range(size)]
         self.__current_player = 1
         self.__boats = {1: boats, 2: boats}
-        self.__shots = [[0]*size for _ in range(size)]
+        self.__shots = {1: [[0]*size for _ in range(size)], 2: [[0]*size for _ in range(size)]}
         self.current_instructions = []
         self.__generate_boats(boats)
 
     @property
     def current_player(self):
         return self.__current_player
+    
+    @current_player.setter
+    def current_player(self, player):
+        self.__current_player = player
     
     @property
     def current_action(self):
@@ -46,7 +50,7 @@ class Grid:
         return [row.copy() for row in self.__grid]
     
     def fire(self, x, y):
-        self.__shots[x][y] = 1
+        self.__shots[self.__current_player][x][y] = 1 
         if self.__grid[x][y] == 1:
             self.__grid[x][y] = 0
             self.__boats[self.__current_player] -= 1
@@ -69,7 +73,7 @@ class Grid:
         res = self.__add_grid_lines()
         for r in res:
             data["content"].append(r)
-        res = self.__add_previous_shots()
+        res = self.__add_previous_shots(player)
         for r in res:
             data["content"].append(r)
         
@@ -101,11 +105,11 @@ class Grid:
 
         return lines
 
-    def __add_previous_shots(self):
+    def __add_previous_shots(self, player):
         shots = []
         for i in range(self.__size):
             for j in range(self.__size):
-                if self.__shots[i][j] == 1:
+                if self.__shots[player][i][j] == 1:
                     shots.append({
                         "tag": "circle",
                         "cx": str(i * self.__case_size + self.__case_size // 2),
@@ -125,11 +129,11 @@ class Grid:
         }
 
 
-    def get_available_zones(self):
+    def get_available_zones(self, player):
         zones = []
         for i in range(self.__size):
             for j in range(self.__size):
-                if self.__shots[i][j] == 0:
+                if self.__shots[player][i][j] == 0:  # take into account the current player
                     zones.append({
                         "x": i * self.__case_size,
                         "y": j * self.__case_size,
@@ -137,6 +141,7 @@ class Grid:
                         "height": self.__case_size
                     })
         return zones
+
 
 # Main part
 def print_game_state(grid):
@@ -146,7 +151,7 @@ def print_game_state(grid):
             {
                 "type": "CLICK",
                 "player": grid.current_player,
-                "zones": grid.get_available_zones()
+                "zones": grid.get_available_zones(grid.current_player)
             }
         ],
         **grid.get_game_state()
@@ -241,7 +246,7 @@ def turn(grid):
     if int(action["player"]) != grid.current_player:
         print_error("MISSING_ACTION", 
             player=grid.current_player,
-            requested_action=grid.current_action)        
+            requested_action="click")  # change this from grid.current_action to "click"
         return False
     grid_x = int(action["x"]) // grid._Grid__case_size
     grid_y = int(action["y"]) // grid._Grid__case_size
@@ -252,10 +257,11 @@ def turn(grid):
             subtype="OUT_OF_ZONE",
             player=grid.current_player,
             action=action,
-            requested_action=grid.current_action)
+            requested_action="click")  # change this from grid.current_action to "click"
         return False    
     print_game_state(grid)
 
+    grid.current_player = 3 - grid.current_player
     return score != 0
 
 
