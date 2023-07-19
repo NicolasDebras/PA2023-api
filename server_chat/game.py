@@ -1,4 +1,5 @@
 import json
+import requests
 from . import sundox
 from channels.generic.websocket import AsyncWebsocketConsumer
 from server_api.models import Party, Play
@@ -8,6 +9,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['party_id']
         self.room_group_name = 'game_%s' % self.room_name
+        self.url_game = None
 
         # Join room group
         await self.channel_layer.group_add(
@@ -16,14 +18,19 @@ class GameConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
-
         plays = await self.fetch_plays()
+        self.url_game = await self.get_party_url_game()
+
+        await self.download_game_file(self.url_game)
+
+        print(self.url_game)
+
         all_data = []
         for play in plays:
             all_data.append(play.infoSend)
         if all_data:
             list_dict = [json.loads(i) for i in all_data]
-            response = sundox.run_in_sandbox("./app/morpion.py", list_dict)
+            response = sundox.run_in_sandbox(self.url_game, list_dict)
             if not response:
                 await self.group_send_message('{"errors":"erreur dans la gestion du docker"}')
                 return
@@ -52,7 +59,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         all_data.append(text_data)
         list_dict = [json.loads(i) for i in all_data]
-        response = sundox.run_in_sandbox("./app/morpion.py", list_dict)
+        response = sundox.run_in_sandbox(self.url_game, list_dict)
         if not response:
             await self.group_send_message('{"errors":"erreur dans la gestion du docker"}')
             return
@@ -64,7 +71,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             await self.group_send_message(response_data)
             await self.save_play(text_data)
         else:
-           await self.send(response_data) 
+           await self.send(text_data=json.dumps(response_data))
 
     async def save_play(self, info_send):
         party_id = int(self.room_name)
@@ -101,3 +108,25 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps(message))
+
+    async def get_party_url_game(self):
+        if self.url_game is None:
+            party_id = int(self.room_name)
+            party = await sync_to_async(Party.objects.get)(id=party_id)
+            self.url_game = party.url_game
+
+        return self.url_game
+    
+    async def download_game_file(self, url):
+        local_filename = "./app/morpion.py"
+
+        # Envoyer une requête HTTP pour télécharger le fichier
+        response = requests.get(url, stream=True)
+
+        # Vérifier si le téléchargement a réussi
+        if response.status_code == 200:
+            with open(local_filename, 'wb') as file:
+                for chunk in response.iter_content(chunk_size=128):
+                    file.write(chunk)
+
+        self.url_game = local_filename
