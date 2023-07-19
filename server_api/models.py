@@ -62,3 +62,4 @@ class Play(models.Model):
 
     #lien avec le joueur 
     party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name='fk_game_partie')
+    

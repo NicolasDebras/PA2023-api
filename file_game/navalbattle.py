@@ -27,6 +27,14 @@ class Grid:
         self.current_instructions = []
         self.__generate_boats(boats)
 
+    @property
+    def current_player(self):
+        return self.__current_player
+    
+    @property
+    def current_action(self):
+        return self.__current_action
+
     def __generate_boats(self, boats):
         for _ in range(boats):
             x, y = random.randint(0, self.__size - 1), random.randint(0, self.__size - 1)
@@ -112,7 +120,34 @@ class Grid:
         }
 
 
+    def get_available_zones(self):
+        zones = []
+        for i in range(self.__size):
+            for j in range(self.__size):
+                if self.__shots[i][j] == 0:
+                    zones.append({
+                        "x": i * self.__case_size,
+                        "y": j * self.__case_size,
+                        "width": self.__case_size,
+                        "height": self.__case_size
+                    })
+        return zones
+
 # Main part
+def print_game_state(grid):
+    game_state = {
+        "displays": [grid.get_svg(1), grid.get_svg(2)],
+        "requested_actions": [
+            {
+                "type": "CLICK",
+                "player": grid.current_player,
+                "zones": grid.get_available_zones()
+            }
+        ],
+        **grid.get_game_state()
+    }
+
+    print(json.dumps(game_state, indent=2))
 
 def read_json():
     content = input()
@@ -166,10 +201,7 @@ def init(grid):
                     fatal=True)
 
     grid.current_instructions.append(grid.get_grid_state())
-    print(json.dumps({
-            "displays": [grid.get_svg(1), grid.get_svg(2)],
-            **grid.get_game_state()
-        }, indent=2))
+    print_game_state(grid)
 
 
 def turn(grid):
@@ -190,10 +222,17 @@ def turn(grid):
     action = actions[0]
     if not isinstance(action, dict):
         print_error("BAD_FORMAT", 
-            message="action is not a dict containing player, x and y values")
-    if not {"x", "y","player"}.issubset(action.keys()):
+            message="action is not a dict containing player, x, y and type values")
+    if not {"x", "y","player","type"}.issubset(action.keys()):
         print_error("BAD_FORMAT", 
-            message="action is not a dict containing player, x and y values")
+            message="action is not a dict containing player, x, y and type values")
+    if action["type"].lower() != "click":
+        print_error("WRONG_ACTION", 
+            subtype="UNEXPECTED_ACTION",
+            player=action["player"],
+            action=action,
+            requested_action="click")
+        return False
     if int(action["player"]) != grid.current_player:
         print_error("MISSING_ACTION", 
             player=grid.current_player,
@@ -208,12 +247,10 @@ def turn(grid):
             action=action,
             requested_action=grid.current_action)
         return False    
-    print(json.dumps({
-            "displays": [grid.get_svg(1), grid.get_svg(2)],
-            **grid.get_game_state()
-        }, indent=2))
+    print_game_state(grid)
 
     return score != 0
+
 
 
 def str_all_values(content):
