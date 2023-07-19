@@ -243,8 +243,10 @@ def turn(grid):
             player=grid.current_player,
             requested_action=grid.current_action)        
         return False
+    grid_x = int(action["x"]) // grid._Grid__case_size
+    grid_y = int(action["y"]) // grid._Grid__case_size
     try:
-        score = grid.fire(int(action["x"]), int(action["y"]))
+        score = grid.fire(grid_x, grid_y)
     except AttributeError:
         print_error("WRONG_ACTION", 
             subtype="OUT_OF_ZONE",
@@ -255,7 +257,6 @@ def turn(grid):
     print_game_state(grid)
 
     return score != 0
-
 
 
 def str_all_values(content):
