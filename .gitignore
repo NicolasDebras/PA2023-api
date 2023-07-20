@@ -9,3 +9,4 @@ server/Scripts/
 *.cfg
 *.rdb
 app/
+.metals/

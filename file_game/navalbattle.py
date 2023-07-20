@@ -17,15 +17,14 @@ BOATS_ARG = {
 }
 
 class Grid:
-    def __init__(self, case_size=100, size=10, boats=5):
+    def __init__(self, case_size=100, size=10):
         self.__case_size = case_size
         self.__size = size
         self.__grid = [[0]*size for _ in range(size)]
         self.__current_player = 1
-        self.__boats = {1: boats, 2: boats}
+        self.__boats = {1: 0, 2: 0}
         self.__shots = {1: [[0]*size for _ in range(size)], 2: [[0]*size for _ in range(size)]}
         self.current_instructions = []
-        self.__generate_boats(boats)
 
     @property
     def current_player(self):
@@ -39,12 +38,6 @@ class Grid:
     def current_action(self):
         return self.__current_action
 
-    def __generate_boats(self, boats):
-        for _ in range(boats):
-            x, y = random.randint(0, self.__size - 1), random.randint(0, self.__size - 1)
-            while self.__grid[x][y] == 1:
-                x, y = random.randint(0, self.__size - 1), random.randint(0, self.__size - 1)
-            self.__grid[x][y] = 1
     
     def get_grid_state(self):
         return [row.copy() for row in self.__grid]
@@ -52,7 +45,7 @@ class Grid:
     def fire(self, x, y):
         self.__shots[self.__current_player][x][y] = 1 
         if self.__grid[x][y] == 1:
-            self.__grid[x][y] = 0
+            self.__grid[x][y] = 2  # change here to 2, indicating a boat has been hit
             self.__boats[self.__current_player] -= 1
             return 1
         else:
@@ -67,7 +60,7 @@ class Grid:
         }
 
         data["content"] = [
-			{"tag":"style", "content": "line{stroke:black;stroke-width:4;}"}
+			{"tag":"style", "content": "line{stroke:white;stroke-width:4;}"}
 		]
 
         res = self.__add_grid_lines()
@@ -110,15 +103,33 @@ class Grid:
         for i in range(self.__size):
             for j in range(self.__size):
                 if self.__shots[player][i][j] == 1:
-                    shots.append({
-                        "tag": "circle",
-                        "cx": str(i * self.__case_size + self.__case_size // 2),
-                        "cy": str(j * self.__case_size + self.__case_size // 2),
-                        "r": str(self.__case_size // 4),
-                        "fill": "red" if self.__grid[i][j] == 0 else "green"
-                    })
+                    # Add a green circle only if the shot hit a boat
+                    if self.__grid[i][j] == 2:  # change the check here from 0 to 2
+                        shots.append({
+                            "tag": "circle",
+                            "cx": str(i * self.__case_size + self.__case_size // 2),
+                            "cy": str(j * self.__case_size + self.__case_size // 2),
+                            "r": str(self.__case_size // 4),
+                            "fill": "green"  # green color for hit boats
+                        })
+                    else:
+                        shots.append({
+                            "tag": "circle",
+                            "cx": str(i * self.__case_size + self.__case_size // 2),
+                            "cy": str(j * self.__case_size + self.__case_size // 2),
+                            "r": str(self.__case_size // 4),
+                            "fill": "red"  # red color for missed shots
+                        })
         return shots
 
+
+    def generate_boats(self, boats):
+        self.__boats = {1: boats, 2: boats}
+        for _ in range(boats):
+            x, y = random.randint(0, self.__size - 1), random.randint(0, self.__size - 1)
+            while self.__grid[x][y] != 0:
+                x, y = random.randint(0, self.__size - 1), random.randint(0, self.__size - 1)
+            self.__grid[x][y] = 1
 
     def get_game_state(self):
         return {
@@ -127,7 +138,6 @@ class Grid:
                 "game_over": self.__boats[1] == 0 or self.__boats[2] == 0
             }
         }
-
 
     def get_available_zones(self, player):
         zones = []
@@ -210,6 +220,7 @@ def init(grid):
                     value=v,
                     fatal=True)
 
+    grid.generate_boats(int(init_content["boats"]))
     grid.current_instructions.append(grid.get_grid_state())
     print_game_state(grid)
 
