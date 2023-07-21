@@ -186,10 +186,13 @@ def add_point(request, party_id, participant_id):
     except Party.DoesNotExist:
         return Response({"error": "Party not found"}, status=404)
     try:
-        pt = Party.objects.get(id=participant_id, party=party)
+        pt = Participant.objects.get(id=participant_id, party=party)
     except Party.DoesNotExist:
         return Response({"error": "Participant not found"}, status=404)
-    pt.point += 1
+    if pt.point != None:
+        pt.point += 1
+    else: 
+        pt.point = 1
     pt.save()
 
     serializer = FullPartySerializers(party)
