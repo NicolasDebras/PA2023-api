@@ -179,6 +179,7 @@ import json
 
 @api_view(['PATCH'])
 def update_party(request, party_id):
+    print(party_id)
     try:
         party = Party.objects.get(id=party_id)
     except Party.DoesNotExist:
