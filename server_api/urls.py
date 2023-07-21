@@ -21,6 +21,7 @@ urlpatterns = [
     path('myparty/<int:id_player>/', views.MyPartyView.as_view()),
     path('oneparty/<int:party_id>/', views.OneParty),
     path('update-party/<int:party_id>/', views.update_party),
+    path('addpoint/<int:party_id>/<int:participant_id>/', views.add_point),
     path('message/<int:party_id>/', views.MessageByUser)
 ]
 urlpatterns += router.urls

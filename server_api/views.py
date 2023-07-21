@@ -177,9 +177,29 @@ def OneParty(request, party_id):
 
 import json
 
+
+@api_view(['PATCH'])
+@authentication_classes([TokenAuthentication])
+def add_point(request, party_id, participant_id):
+    try:
+        party = Party.objects.get(id=party_id)
+    except Party.DoesNotExist:
+        return Response({"error": "Party not found"}, status=404)
+    try:
+        pt = Party.objects.get(id=participant_id, party=party)
+    except Party.DoesNotExist:
+        return Response({"error": "Participant not found"}, status=404)
+    pt.point += 1
+    pt.save()
+
+    serializer = FullPartySerializers(party)
+
+    return Response(serializer.data)
+
+    
+
 @api_view(['PATCH'])
 def update_party(request, party_id):
-    print(party_id)
     try:
         party = Party.objects.get(id=party_id)
     except Party.DoesNotExist:
