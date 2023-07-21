@@ -190,7 +190,6 @@ def update_party(request, party_id):
     participants_data = data.get('participants', [])
     argument_parties_data = data.get('argument_parties', [])
 
-    # Serializer pour les participants
     for pt in participants_data:
         try:
             p = Participant.objects.get(id=pt['id'])
@@ -201,12 +200,13 @@ def update_party(request, party_id):
         p.tag_player = pt['tag_player']
         p.save()
 
+    ArgumentParty.objects.delete(party=party),
+
     if len(argument_parties_data) != 0:
         for ap in argument_parties_data:
             ArgumentParty.objects.create(party=party, value=ap['value'], type=ap['type'],name=ap['name'] )
 
 
-    # Mise à jour de la Party avec les données modifiées
     party.url_game = data.get('url_game', party.url_game)
     party.language = data.get('language', party.language)
     party.max_player = data.get('max_player', party.max_player)
