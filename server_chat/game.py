@@ -57,8 +57,12 @@ class GameConsumer(AsyncWebsocketConsumer):
             plays = await self.fetch_plays()
             for play in plays:
                 all_data.append(play.infoSend)
-
-        all_data.append(text_data)
+        if "delete" not in text_data:
+            all_data.append(text_data)
+        else: 
+            await self.clear_last_play()
+            all_data.pop()
+        
         list_dict = [json.loads(i) for i in all_data]
         response = await sync_to_async(sundox.run_in_sandbox)(os.path.abspath(self.url_game), list_dict)
         if not response:
@@ -70,7 +74,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         response_data = response[-1]
         if "errors" not in response_data:
             await self.group_send_message(response_data)
-            await self.save_play(text_data)
+            if "delete" not in text_data:
+                await self.save_play(text_data)
         else:
            await self.send(text_data=json.dumps(response_data))
 
@@ -132,3 +137,10 @@ class GameConsumer(AsyncWebsocketConsumer):
                     file.write(chunk)
 
         self.url_game = local_filename
+    
+    async def clear_last_play(self):
+        party_id = int(self.room_name)
+        party = await sync_to_async(Party.objects.get)(id=party_id)
+        latest_play = await sync_to_async(Play.objects.filter(party=party).latest)('date_creation')
+        if latest_play is not None:
+            await sync_to_async(latest_play.delete)()
