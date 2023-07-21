@@ -195,7 +195,8 @@ def update_party(request, party_id):
         try:
             p = Participant.objects.get(id=pt['id'])
         except p.DoesNotExist:
-            return Response({"error": "Party not found"}, status=404)
+            print("test")
+            return Response({"error": "Particpant not found"}, status=404)
         
         p.tag_player = pt['tag_player']
         p.save()
