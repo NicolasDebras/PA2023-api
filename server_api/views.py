@@ -223,7 +223,8 @@ def update_party(request, party_id):
         p.tag_player = pt['tag_player']
         p.save()
 
-    ArgumentParty.objects.delete(party=party),
+    ArgumentParty.objects.filter(party=party).delete()
+
 
     if len(argument_parties_data) != 0:
         for ap in argument_parties_data:
