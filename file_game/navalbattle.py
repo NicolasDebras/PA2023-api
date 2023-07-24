@@ -24,6 +24,7 @@ class Grid:
         self.__current_player = 1
         self.__boats = {1: 0, 2: 0}
         self.__shots = {1: [[0]*size for _ in range(size)], 2: [[0]*size for _ in range(size)]}
+        self.__hits = {1: [[0]*size for _ in range(size)], 2: [[0]*size for _ in range(size)]}
         self.current_instructions = []
 
     @property
@@ -45,11 +46,12 @@ class Grid:
     def fire(self, x, y):
         self.__shots[self.__current_player][x][y] = 1 
         if self.__grid[x][y] == 1:
-            self.__grid[x][y] = 2 
-            self.__boats[3 - self.__current_player] -= 1
+            self.__hits[self.__current_player][x][y] = 1
+            self.__boats[self.__current_player] -= 1
             return 1
         else:
             return 0
+
 
     def get_svg(self, player):
         data = {
@@ -101,7 +103,7 @@ class Grid:
         for i in range(self.__size):
             for j in range(self.__size):
                 if self.__shots[player][i][j] == 1:
-                    if self.__grid[i][j] == 2:  
+                    if self.__hits[player][i][j] == 1:
                         shots.append({
                             "tag": "circle",
                             "cx": str(i * self.__case_size + self.__case_size // 2),
@@ -118,6 +120,7 @@ class Grid:
                             "fill": "red" 
                         })
         return shots
+
 
 
     def generate_boats(self, boats):
@@ -140,7 +143,7 @@ class Grid:
         zones = []
         for i in range(self.__size):
             for j in range(self.__size):
-                if self.__shots[player][i][j] == 0:  # take into account the current player
+                if self.__shots[player][i][j] == 0: 
                     zones.append({
                         "x": i * self.__case_size,
                         "y": j * self.__case_size,
