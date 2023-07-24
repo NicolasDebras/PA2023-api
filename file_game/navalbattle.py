@@ -44,11 +44,12 @@ class Grid:
         return {player: [row.copy() for row in self.__grid[player]] for player in [1, 2]}
     
     def fire(self, x, y):
+        other_player = 3 - self.__current_player 
         self.__shots[self.__current_player][x][y] = 1 
-        if self.__grid[self.__current_player][x][y] == 1:
-            self.__grid[self.__current_player][x][y] = 2
+        if self.__grid[other_player][x][y] == 1:
+            self.__grid[other_player][x][y] = 2
             self.__hits[self.__current_player][x][y] = 1
-            self.__boats[self.__current_player] -= 1
+            self.__boats[other_player] -= 1
             return 1
         else:
             return 0
