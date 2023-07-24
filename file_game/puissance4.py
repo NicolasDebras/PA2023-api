@@ -40,7 +40,7 @@ class Grid:
 		x = x//self.__case_size
 		if x < 0 or x > 6:
 			raise AttributeError("x not in range")
-		y = next((y for y in range(6) if self.__grid[x][y] == 0), None)
+		y = next((y for y in reversed(range(6)) if self.__grid[x][y] == 0), None)
 		if y is None:
 			raise AttributeError("column is full")
 		self.__grid[x][y] = self.__current_player
@@ -97,16 +97,16 @@ class Grid:
 				})
 
 		for x in range(7):
-			for y in range(6):
+			for y in reversed(range(6)):
 				if self.__grid[x][y] == 0:
 					continue
-				color = "blue"
+				color = "mediumslateblue"
 				if self.__grid[x][y] == 2:
-					color = "red"
+					color = "peru"
 				content.append({
 					"tag":"circle",
 					"cx":int((0.5+x)*self.__case_size),
-					"cy":int((0.5+y)*self.__case_size),
+					"cy":int((5.5-y)*self.__case_size),  
 					"r":self.__case_size//3,
 					"fill":color
 					})
