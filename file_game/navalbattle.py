@@ -115,8 +115,8 @@ class Grid:
                     else:
                         shots.append({
                             "tag": "circle",
-                            "cx": str(i * self.__case_size + self.__case_size // 2),
-                            "cy": str(j * self.__case_size + self.__case_size // 2),
+                            "cx": str(j * self.__case_size + self.__case_size // 2),
+                            "cy": str(i * self.__case_size + self.__case_size // 2),
                             "r": str(self.__case_size // 4),
                             "fill": "red"  # red color for missed shots
                         })
