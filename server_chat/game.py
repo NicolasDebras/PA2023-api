@@ -12,7 +12,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.room_group_name = 'game_%s' % self.room_name
         self.url_game = None
 
-        # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -31,6 +30,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             all_data.append(play.infoSend)
         if all_data:
             list_dict = [json.loads(i) for i in all_data]
+            print("toto")
             response = await sync_to_async(sundox.run_in_sandbox)(os.path.abspath(self.url_game), list_dict)
             if not response:
                 await self.group_send_message('{"errors":"erreur dans la gestion du docker"}')
@@ -42,7 +42,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             await self.group_send_message(response_data)
 
     async def disconnect(self, close_code):
-        # Leave room group
+
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -50,6 +50,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         all_data = []
+        print("toto")
 
         if "init" in text_data:
             await self.clear_play()
@@ -60,9 +61,12 @@ class GameConsumer(AsyncWebsocketConsumer):
         if "delete" not in text_data:
             all_data.append(text_data)
         else: 
-            await self.clear_last_play()
-            all_data.pop()
-        
+            if len(all_data) > 1:
+                all_data.pop()
+                await self.clear_last_play()
+            else:
+                self.send(text_data=json.dumps({"errors":"pas assez de donnée pour backs"}))
+                return
         list_dict = [json.loads(i) for i in all_data]
         response = await sync_to_async(sundox.run_in_sandbox)(os.path.abspath(self.url_game), list_dict)
         if not response:
@@ -100,7 +104,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         await sync_to_async(plays.delete)()
 
     async def group_send_message(self, message):
-        # Send message to room group
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -112,7 +116,6 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def game_message(self, event):
         message = event['message']
 
-        # Send message to WebSocket
         await self.send(text_data=json.dumps(message))
 
     async def get_party_url_game(self):
@@ -127,10 +130,9 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def download_game_file(self, url):
         local_filename = "./app/input" +self.room_group_name+ ".py"
         
-        # Envoyer une requête HTTP pour télécharger le fichier
+        # requête HTTP pour télécharger le fichier
         response = requests.get(url, stream=True)
 
-        # Vérifier si le téléchargement a réussi
         if response.status_code == 200:
             with open(local_filename, 'wb') as file:
                 for chunk in response.iter_content(chunk_size=128):

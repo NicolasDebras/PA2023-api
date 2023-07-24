@@ -167,30 +167,9 @@ class PartyPatchSerializer(serializers.ModelSerializer):
         model = Party
         fields = ['url_game', 'language', 'max_player', 'participants', 'argument_parties']
 
-    
-
-    def update(self, instance, validated_data):
-
-        participants_data = validated_data.pop('participants', [])
-        argument_parties_data = validated_data.pop('argument_parties', None)  # Check if argument_parties is provided
-        instance = super().update(instance, validated_data)
-
-        for participant_data in participants_data:
-            participant = Participant.objects.get(id=participant_data['id'])
-            participant.tag_player = participant_data['tag_player']
-            participant.save()
-
-        if argument_parties_data is not None and argument_parties_data:  # Only process argument_parties if it was provided and is not empty
-            ArgumentParty.objects.filter(party=instance).delete()
-            for argument_party_data in argument_parties_data:
-                ArgumentParty.objects.create(party=instance, **argument_party_data)
-
-        return instance
-
-
 
 class MessageSerializers(serializers.ModelSerializer):
-    sender = LessPlayerSerializers()  # Nested serializer for sender field
+    sender = LessPlayerSerializers()  
     content = serializers.CharField(allow_blank=True)
 
     class Meta:
