@@ -45,8 +45,8 @@ class Grid:
     def fire(self, x, y):
         self.__shots[self.__current_player][x][y] = 1 
         if self.__grid[x][y] == 1:
-            self.__grid[x][y] = 2  # change here to 2, indicating a boat has been hit
-            self.__boats[self.__current_player] -= 1
+            self.__grid[x][y] = 2 
+            self.__boats[3 - self.__current_player] -= 1
             return 1
         else:
             return 0
