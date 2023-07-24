@@ -179,7 +179,6 @@ import json
 
 
 @api_view(['PATCH'])
-@authentication_classes([TokenAuthentication])
 def add_point(request, party_id, participant_id):
     try:
         party = Party.objects.get(id=party_id)

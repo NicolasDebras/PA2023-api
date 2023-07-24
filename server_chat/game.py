@@ -146,3 +146,4 @@ class GameConsumer(AsyncWebsocketConsumer):
         latest_play = await sync_to_async(Play.objects.filter(party=party).latest)('date_creation')
         if latest_play is not None:
             await sync_to_async(latest_play.delete)()
+    
