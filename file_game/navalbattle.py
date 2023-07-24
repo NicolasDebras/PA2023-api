@@ -41,7 +41,7 @@ class Grid:
 
     
     def get_grid_state(self):
-        return [row.copy() for row in self.__grid]
+        return {player: [row.copy() for row in self.__grid[player]] for player in [1, 2]}
     
     def fire(self, x, y):
         self.__shots[self.__current_player][x][y] = 1 
@@ -122,13 +122,18 @@ class Grid:
         return shots
 
 
-    def generate_boats(self, boats):
-        self.__boats = {1: boats, 2: boats}
-        for _ in range(boats):
-            x, y = random.randint(0, self.__size - 1), random.randint(0, self.__size - 1)
-            while self.__grid[x][y] != 0:
-                x, y = random.randint(0, self.__size - 1), random.randint(0, self.__size - 1)
-            self.__grid[x][y] = 1
+    def generate_boats(self, boat_number):
+        for player in [1, 2]:
+            for _ in range(boat_number):
+                boat_placed = False
+                while not boat_placed:
+                    x = random.randint(0, self.__size - 1)
+                    y = random.randint(0, self.__size - 1)
+                    if self.__grid[player][x][y] == 0:
+                        self.__grid[player][x][y] = 1
+                        self.__boats[player] += 1
+                        boat_placed = True
+
 
     def get_game_state(self):
         return {
