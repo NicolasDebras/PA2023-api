@@ -20,11 +20,11 @@ class Grid:
     def __init__(self, case_size=100, size=10):
         self.__case_size = case_size
         self.__size = size
-        self.__grid = [[0]*size for _ in range(size)]
         self.__current_player = 1
         self.__boats = {1: 0, 2: 0}
-        self.__shots = {1: [[0]*size for _ in range(size)], 2: [[0]*size for _ in range(size)]}
+        self.__grid = {1: [[0]*size for _ in range(size)], 2: [[0]*size for _ in range(size)]}
         self.__hits = {1: [[0]*size for _ in range(size)], 2: [[0]*size for _ in range(size)]}
+        self.__shots = {1: [[0]*size for _ in range(size)], 2: [[0]*size for _ in range(size)]}
         self.current_instructions = []
 
     @property
@@ -45,13 +45,13 @@ class Grid:
     
     def fire(self, x, y):
         self.__shots[self.__current_player][x][y] = 1 
-        if self.__grid[x][y] == 1:
+        if self.__grid[self.__current_player][x][y] == 1:
+            self.__grid[self.__current_player][x][y] = 2
             self.__hits[self.__current_player][x][y] = 1
             self.__boats[self.__current_player] -= 1
             return 1
         else:
             return 0
-
 
     def get_svg(self, player):
         data = {
@@ -120,7 +120,6 @@ class Grid:
                             "fill": "red" 
                         })
         return shots
-
 
 
     def generate_boats(self, boats):
