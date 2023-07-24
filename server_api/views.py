@@ -1,6 +1,6 @@
 from .serializers import PlayerSerializers, FriendSerializers, PartySerializers, ParticipantSerializers, FriendSerializers, MessageSerializers, FullPartySerializers, PartyPatchSerializer, ArgumentPartySerializers, ParticipantSerializer
 from .permissions import IsCreationOrIsAuthenticated, IsViewOrIsAuthenticated
-from .models import Friend, Player, Party, Participant, Message, ArgumentParty
+from .models import Friend, Player, Party, Participant, Message, ArgumentParty, Play
 
 
 from rest_framework.response import Response
@@ -223,6 +223,7 @@ def update_party(request, party_id):
         p.save()
 
     ArgumentParty.objects.filter(party=party).delete()
+    Play.objects.filter(party=party).delete()
 
 
     if len(argument_parties_data) != 0:
