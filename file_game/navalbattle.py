@@ -76,7 +76,6 @@ class Grid:
     def __add_grid_lines(self):
         lines = []
 
-        # Ajout des lignes verticales
         for i in range(self.__size + 1):
             lines.append({
                 "tag": "line",
@@ -86,7 +85,6 @@ class Grid:
                 "y2": str(self.__size * self.__case_size),
             })
 
-        # Ajout des lignes horizontales
         for i in range(self.__size + 1):
             lines.append({
                 "tag": "line",
@@ -103,22 +101,21 @@ class Grid:
         for i in range(self.__size):
             for j in range(self.__size):
                 if self.__shots[player][i][j] == 1:
-                    # Add a green circle only if the shot hit a boat
-                    if self.__grid[i][j] == 2:  # change the check here from 0 to 2
+                    if self.__grid[i][j] == 2:  
                         shots.append({
                             "tag": "circle",
                             "cx": str(i * self.__case_size + self.__case_size // 2),
                             "cy": str(j * self.__case_size + self.__case_size // 2),
                             "r": str(self.__case_size // 4),
-                            "fill": "green"  # green color for hit boats
+                            "fill": "green" 
                         })
                     else:
                         shots.append({
                             "tag": "circle",
-                            "cx": str(j * self.__case_size + self.__case_size // 2),
-                            "cy": str(i * self.__case_size + self.__case_size // 2),
+                            "cx": str(i * self.__case_size + self.__case_size // 2),
+                            "cy": str(j * self.__case_size + self.__case_size // 2),
                             "r": str(self.__case_size // 4),
-                            "fill": "red"  # red color for missed shots
+                            "fill": "red" 
                         })
         return shots
 
@@ -257,7 +254,7 @@ def turn(grid):
     if int(action["player"]) != grid.current_player:
         print_error("MISSING_ACTION", 
             player=grid.current_player,
-            requested_action="click")  # change this from grid.current_action to "click"
+            requested_action="click")  
         return False
     grid_x = int(action["x"]) // grid._Grid__case_size
     grid_y = int(action["y"]) // grid._Grid__case_size
@@ -268,7 +265,7 @@ def turn(grid):
             subtype="OUT_OF_ZONE",
             player=grid.current_player,
             action=action,
-            requested_action="click")  # change this from grid.current_action to "click"
+            requested_action="click")  
         return False    
     print_game_state(grid)
 
