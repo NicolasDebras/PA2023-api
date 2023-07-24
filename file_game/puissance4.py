@@ -51,14 +51,17 @@ class Grid:
 	def clickable_zones(self):
 		zones = []
 		for x in range(7):
-			if self.__grid[x][5] == 0:
+			y = next((y for y in range(6) if self.__grid[x][y] == 0), -1)
+			if y != -1:
 				zones.append({
 					"x":x*self.__case_size,
-					"y":0,
+					"y":y*self.__case_size,
 					"width":self.__case_size,
-					"height":self.__case_size*6
+					"height":self.__case_size
 					})
 		return zones
+
+
 
 	@property
 	def current_player(self):
