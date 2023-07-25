@@ -62,4 +62,17 @@ class Play(models.Model):
 
     #lien avec le joueur 
     party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name='fk_game_partie')
+
+class Histo(models.Model):
+    url_game = models.CharField(max_length=500, null=True)
+
+    party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name='fk_Histo_partie')
+
+class Histo_Play(models.Model):
+    infoSend = models.CharField(max_length=5000)
+    date_creation = models.DateTimeField(auto_now_add=True, null=True)
+    url_game = models.CharField(max_length=500, null=True)
+
+    #lien avec le joueur 
+    party = models.ForeignKey(Party, on_delete=models.CASCADE, related_name='fk_playhisto_partie')
     
